@@ -1,0 +1,62 @@
+# Environment variables (contains API keys and passwords)
+.env
+
+# Python virtual environment
+.venv/
+venv/
+env/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Database files (contains actual data)
+*.db
+*.sqlite
+*.sqlite3
+
+# Database temporary files
+*.db-shm
+*.db-wal
+*.db.corrupted
+
+# Downloaded attachments (may contain sensitive company data)
+attachments/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Backup files
+*.bak
+*.backup
+
+# CSV data files (may contain sensitive data)
+scot_data/*.csv
+
+# Keep the directory structure but ignore the actual data files
+scot_data/*
+!scot_data/.gitkeep 
