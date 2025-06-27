@@ -31,6 +31,11 @@ link_data/
 financial_data/
 portfolio_data/
 
+# Generated financial reports (data is stored in database)
+financial_reports/
+*.xlsx
+*.xls
+
 # IDE and editor files
 .vscode/
 .idea/
