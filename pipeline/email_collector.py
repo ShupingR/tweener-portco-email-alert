@@ -24,10 +24,10 @@ import argparse
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
-# Import our existing modules
-from claude_email_processor import ClaudeEmailProcessor
-from db import SessionLocal
-from models import Company, EmailUpdate, Attachment
+# Import our modules using new structure
+from pipeline.email_processor import ClaudeEmailProcessor
+from database.connection import SessionLocal
+from database.models import Company, EmailUpdate, Attachment
 
 # Load environment variables
 load_dotenv()

@@ -12,8 +12,8 @@ import email
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 import anthropic
-from db import SessionLocal
-from models import Company, Contact, EmailUpdate, Attachment
+from database.connection import SessionLocal
+from database.models import Company, Contact, EmailUpdate, Attachment
 from email.header import decode_header
 
 # Load environment variables

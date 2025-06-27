@@ -1,22 +1,21 @@
 #!/bin/bash
-
-"""
-Email Collection Wrapper Script
-===============================
-
-Main entry point for the Tweener Fund email collection system.
-This script runs the daily email collector with proper error handling
-and colored output for easy monitoring.
-
-Usage:
-    ./collect_emails.sh [--days=N] [--dry-run] [--stats]
-
-The script will:
-1. Activate the Python virtual environment
-2. Run the email collector from the pipeline module
-3. Display results with colored output
-4. Handle errors gracefully
-"""
+#
+# Email Collection Wrapper Script
+# ===============================
+#
+# Main entry point for the Tweener Fund email collection system.
+# This script runs the daily email collector with proper error handling
+# and colored output for easy monitoring.
+#
+# Usage:
+#     ./collect_emails.sh [--days=N] [--dry-run] [--stats]
+#
+# The script will:
+# 1. Activate the Python virtual environment
+# 2. Run the email collector from the pipeline module
+# 3. Display results with colored output
+# 4. Handle errors gracefully
+#
 
 # Colors for output
 RED='\033[0;31m'
