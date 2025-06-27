@@ -1,10 +1,6 @@
 # financial_metrics_formatter.py
 import re
-import pandas as pd
 from decimal import Decimal, InvalidOperation
-from datetime import datetime
-from financial_metrics_models import FinancialMetrics
-from db import SessionLocal
 
 class FinancialMetricsFormatter:
     def __init__(self):
@@ -113,8 +109,8 @@ class FinancialMetricsFormatter:
         else:
             return f"{value:.0f} months"
 
-    def standardize_metric_record(self, metric_record):
-        """Standardize a single financial metrics record"""
+    def standardize_metric_values(self, metric_record):
+        """Standardize and format values from a financial metrics record"""
         standardized = {}
         
         # Revenue metrics
@@ -164,173 +160,40 @@ class FinancialMetricsFormatter:
             standardized[f'{field}_value'] = parsed_value
             standardized[f'{field}_formatted'] = self.format_currency(parsed_value)
         
-        # Add metadata
-        standardized['company_name'] = metric_record.company.name
-        standardized['reporting_period'] = metric_record.reporting_period
-        standardized['reporting_date'] = metric_record.reporting_date
-        standardized['extraction_confidence'] = metric_record.extraction_confidence
-        standardized['source_type'] = metric_record.source_type
-        
         return standardized
-
-    def create_unified_dataset(self):
-        """Create a unified, standardized dataset of all financial metrics"""
-        session = SessionLocal()
-        
-        try:
-            # Get all financial metrics with company info
-            metrics = session.query(FinancialMetrics).join(FinancialMetrics.company).all()
-            
-            print(f"💰 Standardizing {len(metrics)} financial metric records...")
-            
-            standardized_data = []
-            
-            for metric in metrics:
-                standardized = self.standardize_metric_record(metric)
-                standardized_data.append(standardized)
-            
-            # Convert to DataFrame for easy analysis
-            df = pd.DataFrame(standardized_data)
-            
-            return df
-            
-        finally:
-            session.close()
-
-    def generate_unified_report(self):
-        """Generate a comprehensive unified financial metrics report"""
-        df = self.create_unified_dataset()
-        
-        print("📊 UNIFIED FINANCIAL METRICS REPORT")
-        print("=" * 70)
-        
-        # Summary statistics
-        print(f"📈 Total Records: {len(df)}")
-        print(f"🏢 Companies: {df['company_name'].nunique()}")
-        print(f"📅 Reporting Periods: {df['reporting_period'].nunique()}")
-        print()
-        
-        # ARR Analysis
-        arr_data = df[df['arr_value'].notna()].copy()
-        if not arr_data.empty:
-            print("💰 ANNUAL RECURRING REVENUE (ARR)")
-            print("-" * 40)
-            arr_summary = arr_data.groupby('company_name').agg({
-                'arr_value': 'max',
-                'arr_formatted': 'first',
-                'reporting_period': 'first'
-            }).sort_values('arr_value', ascending=False)
-            
-            for company, row in arr_summary.iterrows():
-                print(f"   {company:<20} {row['arr_formatted']:<10} ({row['reporting_period']})")
-            print()
-        
-        # Cash Balance Analysis
-        cash_data = df[df['cash_balance_value'].notna()].copy()
-        if not cash_data.empty:
-            print("💵 CASH BALANCE")
-            print("-" * 40)
-            cash_summary = cash_data.groupby('company_name').agg({
-                'cash_balance_value': 'max',
-                'cash_balance_formatted': 'first',
-                'reporting_period': 'first'
-            }).sort_values('cash_balance_value', ascending=False)
-            
-            for company, row in cash_summary.iterrows():
-                print(f"   {company:<20} {row['cash_balance_formatted']:<10} ({row['reporting_period']})")
-            print()
-        
-        # Runway Analysis
-        runway_data = df[df['runway_months_value'].notna()].copy()
-        if not runway_data.empty:
-            print("🛣️  CASH RUNWAY")
-            print("-" * 40)
-            runway_summary = runway_data.groupby('company_name').agg({
-                'runway_months_value': 'max',
-                'runway_months_formatted': 'first',
-                'reporting_period': 'first'
-            }).sort_values('runway_months_value', ascending=False)
-            
-            for company, row in runway_summary.iterrows():
-                print(f"   {company:<20} {row['runway_months_formatted']:<12} ({row['reporting_period']})")
-            print()
-        
-        # Growth Analysis
-        growth_data = df[df['arr_growth_value'].notna()].copy()
-        if not growth_data.empty:
-            print("📈 ARR GROWTH RATES")
-            print("-" * 40)
-            growth_summary = growth_data.groupby('company_name').agg({
-                'arr_growth_value': 'first',
-                'arr_growth_formatted': 'first',
-                'reporting_period': 'first'
-            }).sort_values('arr_growth_value', ascending=False)
-            
-            for company, row in growth_summary.iterrows():
-                print(f"   {company:<20} {row['arr_growth_formatted']:<10} ({row['reporting_period']})")
-            print()
-        
-        # Data Quality Summary
-        print("🎯 DATA QUALITY SUMMARY")
-        print("-" * 40)
-        confidence_counts = df['extraction_confidence'].value_counts()
-        for confidence, count in confidence_counts.items():
-            print(f"   {confidence.title():<15} {count:>3} records")
-        
-        print()
-        source_counts = df['source_type'].value_counts()
-        for source, count in source_counts.items():
-            print(f"   {source.title():<15} {count:>3} records")
-        
-        return df
-
-    def export_to_excel(self, filename="unified_financial_metrics.xlsx"):
-        """Export unified metrics to Excel for further analysis"""
-        df = self.create_unified_dataset()
-        
-        # Create multiple sheets
-        with pd.ExcelWriter(filename, engine='openpyxl') as writer:
-            # Full dataset
-            df.to_excel(writer, sheet_name='All_Metrics', index=False)
-            
-            # Summary by company
-            summary_data = []
-            for company in df['company_name'].unique():
-                company_data = df[df['company_name'] == company]
-                latest_record = company_data.iloc[-1]  # Most recent
-                
-                summary_data.append({
-                    'Company': company,
-                    'Latest_Period': latest_record['reporting_period'],
-                    'ARR': latest_record['arr_formatted'],
-                    'MRR': latest_record['mrr_formatted'],
-                    'Cash_Balance': latest_record['cash_balance_formatted'],
-                    'Runway': latest_record['runway_months_formatted'],
-                    'ARR_Growth': latest_record['arr_growth_formatted'],
-                    'Confidence': latest_record['extraction_confidence'],
-                    'Source': latest_record['source_type']
-                })
-            
-            summary_df = pd.DataFrame(summary_data)
-            summary_df.to_excel(writer, sheet_name='Company_Summary', index=False)
-        
-        print(f"📊 Unified metrics exported to: {filename}")
-        return filename
 
 
 def main():
-    """Main function to demonstrate unified formatting"""
+    """Demo function showing formatter usage"""
     formatter = FinancialMetricsFormatter()
     
-    # Generate unified report
-    df = formatter.generate_unified_report()
+    # Example usage
+    test_values = {
+        'currency': ['$2.5M', '$150K', '$1,250,000', '2.5 million'],
+        'percentage': ['15%', '-5.2%', '25 percent'],
+        'runway': ['18 months', '2.5 years', '6 months']
+    }
     
-    # Export to Excel
-    filename = formatter.export_to_excel()
+    print("🔧 FINANCIAL METRICS FORMATTER DEMO")
+    print("=" * 50)
     
-    print(f"\n✅ Unified formatting complete!")
-    print(f"📁 Excel export: {filename}")
-    print(f"📊 Processed {len(df)} records from {df['company_name'].nunique()} companies")
+    print("\n💰 Currency Parsing:")
+    for value in test_values['currency']:
+        parsed = formatter.parse_currency(value)
+        formatted = formatter.format_currency(parsed)
+        print(f"   {value:<15} → {parsed:<10} → {formatted}")
+    
+    print("\n📈 Percentage Parsing:")
+    for value in test_values['percentage']:
+        parsed = formatter.parse_percentage(value)
+        formatted = formatter.format_percentage(parsed)
+        print(f"   {value:<15} → {parsed:<10} → {formatted}")
+    
+    print("\n🛣️  Runway Parsing:")
+    for value in test_values['runway']:
+        parsed = formatter.parse_runway(value)
+        formatted = formatter.format_runway(parsed)
+        print(f"   {value:<15} → {parsed:<10} → {formatted}")
 
 
 if __name__ == "__main__":
