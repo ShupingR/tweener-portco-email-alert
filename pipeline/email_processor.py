@@ -119,7 +119,7 @@ class ClaudeEmailProcessor:
             mail.logout()
     
     def extract_email_content(self, email_message):
-        """Extract content from email message including attachment detection"""
+        """Extract content from email message including aggressive attachment detection"""
         # Decode subject
         subject = ""
         if email_message["subject"]:
@@ -153,49 +153,131 @@ class ClaudeEmailProcessor:
         except:
             date = datetime.now()
         
-        # Extract body and check for attachments
+        # Extract body and check for attachments with AGGRESSIVE detection
         body = ""
         attachments = []
         has_attachments = False
         
+        # Define attachment-friendly content types
+        attachment_content_types = {
+            'application/pdf',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-powerpoint', 
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/zip',
+            'application/x-zip-compressed',
+            'application/octet-stream',
+            'image/jpeg',
+            'image/png',
+            'image/gif',
+            'image/tiff',
+            'text/csv'
+        }
+        
         if email_message.is_multipart():
             for part in email_message.walk():
                 content_type = part.get_content_type()
-                content_disposition = str(part.get("Content-Disposition"))
+                content_disposition = str(part.get("Content-Disposition", ""))
+                filename = part.get_filename()
                 
-                # Check if this part is an attachment
+                # AGGRESSIVE ATTACHMENT DETECTION
+                is_attachment = False
+                
+                # Method 1: Traditional attachment detection
                 if part.get_content_disposition() == 'attachment':
+                    is_attachment = True
+                
+                # Method 2: Check for inline dispositions that might be attachments
+                elif 'attachment' in content_disposition.lower():
+                    is_attachment = True
+                
+                # Method 3: Check for filename presence (strong indicator)
+                elif filename and filename.strip():
+                    is_attachment = True
+                
+                # Method 4: Check for attachment-friendly content types
+                elif content_type in attachment_content_types:
+                    is_attachment = True
+                
+                # Method 5: Check for inline files with file extensions
+                elif content_disposition and 'inline' in content_disposition.lower() and filename:
+                    # Check if filename has a document extension
+                    file_extensions = ['.pdf', '.xlsx', '.xls', '.pptx', '.ppt', '.docx', '.doc', 
+                                     '.csv', '.zip', '.png', '.jpg', '.jpeg', '.gif', '.tiff']
+                    if any(filename.lower().endswith(ext) for ext in file_extensions):
+                        is_attachment = True
+                
+                # Method 6: Check for base64 encoded content that might be files
+                elif (content_type.startswith('application/') and 
+                      part.get('Content-Transfer-Encoding') == 'base64'):
+                    is_attachment = True
+                
+                # Process if identified as attachment
+                if is_attachment:
                     has_attachments = True
-                    filename = part.get_filename()
+                    
+                    # Handle filename decoding more robustly
+                    if not filename:
+                        # Try to extract filename from content-disposition
+                        if 'filename=' in content_disposition:
+                            filename_match = re.search(r'filename[*]?=["\']?([^"\';\r\n]+)', content_disposition)
+                            if filename_match:
+                                filename = filename_match.group(1)
+                    
                     if filename:
                         # Decode filename if needed
-                        if filename:
-                            decoded_filename = decode_header(filename)
-                            if decoded_filename and decoded_filename[0]:
-                                if isinstance(decoded_filename[0][0], bytes):
-                                    try:
-                                        encoding = decoded_filename[0][1] or 'utf-8'
-                                        filename = decoded_filename[0][0].decode(encoding)
-                                    except:
-                                        filename = decoded_filename[0][0].decode('utf-8', errors='ignore')
-                                else:
-                                    filename = decoded_filename[0][0]
+                        decoded_filename = decode_header(filename)
+                        if decoded_filename and decoded_filename[0]:
+                            if isinstance(decoded_filename[0][0], bytes):
+                                try:
+                                    encoding = decoded_filename[0][1] or 'utf-8'
+                                    filename = decoded_filename[0][0].decode(encoding)
+                                except:
+                                    filename = decoded_filename[0][0].decode('utf-8', errors='ignore')
+                            else:
+                                filename = decoded_filename[0][0]
+                        
+                        # Clean filename
+                        filename = filename.strip().strip('"\'')
+                        
+                        # Generate filename if still missing
+                        if not filename:
+                            ext_map = {
+                                'application/pdf': '.pdf',
+                                'application/vnd.ms-excel': '.xls',
+                                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '.xlsx',
+                                'application/vnd.ms-powerpoint': '.ppt',
+                                'application/vnd.openxmlformats-officedocument.presentationml.presentation': '.pptx',
+                                'application/msword': '.doc',
+                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
+                                'text/csv': '.csv',
+                                'image/jpeg': '.jpg',
+                                'image/png': '.png'
+                            }
+                            extension = ext_map.get(content_type, '.bin')
+                            filename = f"attachment_{len(attachments) + 1}{extension}"
                         
                         attachments.append({
                             'part': part,
                             'filename': filename,
-                            'content_type': content_type
+                            'content_type': content_type,
+                            'detection_method': 'aggressive'
                         })
+                        
+                        print(f"      🔍 Found attachment: {filename} ({content_type})")
                 
-                # Extract text content
-                elif content_type == "text/plain" and "attachment" not in content_disposition:
+                # Extract text content (only from non-attachment parts)
+                elif content_type == "text/plain" and not is_attachment:
                     try:
                         part_body = part.get_payload(decode=True)
                         if part_body:
                             body = part_body.decode('utf-8')
                     except:
                         continue
-                elif content_type == "text/html" and "attachment" not in content_disposition and not body:
+                elif content_type == "text/html" and not is_attachment and not body:
                     try:
                         html_body = part.get_payload(decode=True)
                         if html_body:
@@ -206,13 +288,33 @@ class ClaudeEmailProcessor:
                     except:
                         continue
         else:
-            # Single part message
-            try:
-                body_content = email_message.get_payload(decode=True)
-                if body_content:
-                    body = body_content.decode('utf-8')
-            except:
-                body = str(email_message.get_payload())
+            # Single part message - check if it might be an attachment
+            content_type = email_message.get_content_type()
+            filename = email_message.get_filename()
+            
+            if filename or content_type in attachment_content_types:
+                has_attachments = True
+                if not filename:
+                    filename = f"single_part_attachment.{content_type.split('/')[-1]}"
+                
+                attachments.append({
+                    'part': email_message,
+                    'filename': filename,
+                    'content_type': content_type,
+                    'detection_method': 'single_part'
+                })
+            else:
+                # Regular text content
+                try:
+                    body_content = email_message.get_payload(decode=True)
+                    if body_content:
+                        body = body_content.decode('utf-8')
+                except:
+                    body = str(email_message.get_payload())
+        
+        # Log attachment detection results
+        if has_attachments:
+            print(f"      📎 Detected {len(attachments)} attachment(s) using aggressive detection")
         
         return {
             'subject': subject,
