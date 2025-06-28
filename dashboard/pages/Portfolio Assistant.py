@@ -114,8 +114,12 @@ class DatabaseChatbot:
         question_lower = question.lower()
         
         try:
+            # Performance queries (check FIRST to avoid conflicts with "companies")
+            if any(term in question_lower for term in ["performance", "best", "worst", "top", "bottom"]):
+                return self._handle_performance_queries(question_lower)
+            
             # Company-specific queries
-            if "company" in question_lower or "companies" in question_lower:
+            elif "company" in question_lower or "companies" in question_lower:
                 return self._handle_company_queries(question_lower)
             
             # Financial metrics queries
@@ -141,10 +145,6 @@ class DatabaseChatbot:
             # Recent updates
             elif any(term in question_lower for term in ["recent", "latest", "new", "updates"]):
                 return self._handle_recent_updates()
-            
-            # Performance queries
-            elif any(term in question_lower for term in ["performance", "best", "worst", "top", "bottom"]):
-                return self._handle_performance_queries(question_lower)
             
             else:
                 return self._provide_help()
@@ -351,36 +351,108 @@ The dashboard shows detailed financial metrics, growth rates, and operational da
     def _handle_performance_queries(self, question):
         """Handle performance comparison queries"""
         try:
-            if "best" in question or "top" in question:
-                # Find companies with highest growth
-                growth_data = self.session.query(FinancialMetrics).filter(
-                    FinancialMetrics.arr_growth.isnot(None),
-                    FinancialMetrics.arr_growth != 'N/A',
-                    FinancialMetrics.arr_growth != '-'
-                ).order_by(FinancialMetrics.extracted_date.desc()).limit(20).all()
-                
-                if growth_data:
-                    company_growth = {}
-                    for metric in growth_data:
-                        try:
-                            growth_str = str(metric.arr_growth).replace('+', '').replace('%', '')
-                            growth_rate = float(growth_str)
-                            if metric.company.name not in company_growth or growth_rate > company_growth[metric.company.name]:
-                                company_growth[metric.company.name] = growth_rate
-                        except:
-                            continue
-                    
-                    if company_growth:
-                        top_performers = sorted(company_growth.items(), key=lambda x: x[1], reverse=True)[:3]
-                        result = "🚀 **Top Performing Companies (by Growth):**\n"
-                        for i, (company, growth) in enumerate(top_performers, 1):
-                            result += f"{i}. **{company}**: {growth:.1f}% growth\n"
-                        return result
+            if "best" in question or "top" in question or "perform" in question:
+                # Check if asking for both ARR and growth
+                if "arr and growth" in question.lower() or "performance companies" in question.lower():
+                    return self._get_top_companies_combined()
+                # Check if asking specifically about ARR
+                elif "arr" in question.lower():
+                    return self._get_top_companies_by_arr()
+                # Check if asking specifically about growth
+                elif "growth" in question.lower():
+                    return self._get_top_companies_by_growth()
+                else:
+                    # Default to combined performance
+                    return self._get_top_companies_combined()
             
-            return "I can help identify top performers. Try asking 'Which companies are performing best?' or 'Show me top growth companies'."
+            return "I can help identify top performers. Try asking 'Which companies are performing best?' or 'Show me top companies by ARR'."
         
         except Exception as e:
             return f"Error analyzing performance: {str(e)}"
+    
+    def _get_top_companies_combined(self):
+        """Get top 3 companies by both ARR and growth rate"""
+        try:
+            arr_result = self._get_top_companies_by_arr()
+            growth_result = self._get_top_companies_by_growth()
+            
+            # Combine both results
+            combined_result = "🏆 **TOP PERFORMANCE COMPANIES**\n\n"
+            combined_result += arr_result + "\n\n"
+            combined_result += growth_result
+            
+            return combined_result
+            
+        except Exception as e:
+            return f"Error retrieving combined performance data: {str(e)}"
+    
+    def _get_top_companies_by_arr(self):
+        """Get top 3 companies by ARR"""
+        try:
+            # Get latest ARR data for each company
+            arr_data = self.session.query(FinancialMetrics).filter(
+                FinancialMetrics.arr.isnot(None),
+                FinancialMetrics.arr != 'N/A',
+                FinancialMetrics.arr != '-'
+            ).order_by(FinancialMetrics.extracted_date.desc()).limit(50).all()
+            
+            if not arr_data:
+                return "No ARR data available for comparison."
+            
+            # Get latest ARR for each company
+            company_arr = {}
+            for metric in arr_data:
+                arr_value = self._parse_financial_value(metric.arr)
+                if arr_value > 0:
+                    if metric.company.name not in company_arr or arr_value > company_arr[metric.company.name]:
+                        company_arr[metric.company.name] = arr_value
+            
+            if company_arr:
+                top_performers = sorted(company_arr.items(), key=lambda x: x[1], reverse=True)[:3]
+                result = "💰 **Top 3 Companies by ARR:**\n"
+                for i, (company, arr) in enumerate(top_performers, 1):
+                    result += f"{i}. **{company}**: ${arr:,.0f} ARR\n"
+                return result
+            else:
+                return "Unable to parse ARR data for comparison."
+                
+        except Exception as e:
+            return f"Error retrieving ARR data: {str(e)}"
+    
+    def _get_top_companies_by_growth(self):
+        """Get top 3 companies by growth rate"""
+        try:
+            # Find companies with highest growth
+            growth_data = self.session.query(FinancialMetrics).filter(
+                FinancialMetrics.arr_growth.isnot(None),
+                FinancialMetrics.arr_growth != 'N/A',
+                FinancialMetrics.arr_growth != '-'
+            ).order_by(FinancialMetrics.extracted_date.desc()).limit(50).all()
+            
+            if not growth_data:
+                return "No growth data available for comparison."
+            
+            company_growth = {}
+            for metric in growth_data:
+                try:
+                    growth_str = str(metric.arr_growth).replace('+', '').replace('%', '')
+                    growth_rate = float(growth_str)
+                    if metric.company.name not in company_growth or growth_rate > company_growth[metric.company.name]:
+                        company_growth[metric.company.name] = growth_rate
+                except:
+                    continue
+            
+            if company_growth:
+                top_performers = sorted(company_growth.items(), key=lambda x: x[1], reverse=True)[:3]
+                result = "🚀 **Top 3 Companies by Growth Rate:**\n"
+                for i, (company, growth) in enumerate(top_performers, 1):
+                    result += f"{i}. **{company}**: {growth:.1f}% growth\n"
+                return result
+            else:
+                return "Unable to parse growth data for comparison."
+                
+        except Exception as e:
+            return f"Error retrieving growth data: {str(e)}"
     
     def _get_company_details(self, company_name):
         """Get detailed information about a specific company"""
@@ -441,7 +513,7 @@ The dashboard shows detailed financial metrics, growth rates, and operational da
 **General:**
 • "Portfolio overview"
 • "Recent updates"
-• "Top performers"
+• "Top performance companies" (shows both ARR and growth rankings)
 
 Just ask me a question about our portfolio companies!"""
     
@@ -532,9 +604,9 @@ def main():
             st.rerun()
     
     with col3:
-        if st.button("🚀 Top Performers", key="quick_performers"):
-            response = st.session_state.chatbot.query_database("which companies are performing best")
-            st.session_state.chat_history.append(("Top Performers", response))
+        if st.button("🚀 Top Performance Companies", key="quick_performers"):
+            response = st.session_state.chatbot.query_database("top performance companies by ARR and growth")
+            st.session_state.chat_history.append(("Top Performance Companies", response))
             st.rerun()
     
     st.markdown("---")
