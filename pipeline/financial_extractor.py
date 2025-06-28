@@ -11,9 +11,9 @@ from pptx import Presentation
 import openpyxl
 from io import BytesIO
 
-from models import Company, EmailUpdate, Attachment
-from financial_metrics_models import FinancialMetrics, MetricExtraction
-from db import SessionLocal
+from database.models import Company, EmailUpdate, Attachment
+from database.financial_models import FinancialMetrics, MetricExtraction
+from database.connection import SessionLocal
 
 class FinancialMetricsExtractor:
     def __init__(self):
