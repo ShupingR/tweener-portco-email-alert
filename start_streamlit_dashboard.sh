@@ -14,9 +14,9 @@ NC='\033[0m' # No Color
 # Script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo -e "${PURPLE}💰 Streamlit Financial Metrics Dashboard${NC}"
-echo -e "${BLUE}Starting interactive dashboard...${NC}"
-echo ""
+echo "💰 Streamlit Financial Metrics Dashboard"
+echo "Starting interactive dashboard with Tweener Fund branding..."
+echo "Activating virtual environment..."
 
 # Change to script directory
 cd "$SCRIPT_DIR" || {
@@ -69,12 +69,18 @@ if lsof -ti:8888 >/dev/null 2>&1; then
     sleep 2
 fi
 
-# Start the Streamlit dashboard
-echo -e "${GREEN}🚀 Starting Streamlit Financial Metrics Dashboard${NC}"
-echo -e "${BLUE}Dashboard will open automatically in your browser${NC}"
-echo -e "${BLUE}URL: http://localhost:8501${NC}"
-echo -e "${YELLOW}Press Ctrl+C to stop the dashboard${NC}"
-echo ""
+echo "🚀 Starting Streamlit Financial Metrics Dashboard"
+echo "Dashboard will open automatically in your browser"
+echo "URL: http://localhost:8501"
+echo "Features:"
+echo "  - Tweener Fund logo and branding"
+echo "  - Interactive financial metrics charts"
+echo "  - Portfolio company performance tracking"
+echo "  - Filtering and search capabilities"
+echo "Press Ctrl+C to stop the dashboard"
 
-# Run Streamlit
-streamlit run dashboard/streamlit_app.py --server.port=8501 --server.address=0.0.0.0 --browser.gatherUsageStats=false 
+# Start Streamlit with proper configuration
+streamlit run dashboard/streamlit_app.py \
+    --server.port=8501 \
+    --server.address=localhost \
+    --browser.gatherUsageStats=false 

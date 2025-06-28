@@ -28,7 +28,7 @@ from database.connection import SessionLocal
 
 # Page configuration
 st.set_page_config(
-    page_title="Financial Metrics Dashboard",
+    page_title="Tweener Insights - Portfolio Intelligence",
     page_icon="💰",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -64,6 +64,58 @@ st.markdown("""
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif !important;
     }
     
+    /* Ensure all main content text is visible */
+    .main .element-container * {
+        color: var(--tweener-gray-800) !important;
+    }
+    
+    /* Portfolio overview section specific styling */
+    .main h2 {
+        color: var(--tweener-gray-800) !important;
+        font-weight: 600 !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    /* Force visibility for all metric text */
+    .stMetric {
+        background-color: white !important;
+        padding: 1rem !important;
+        border-radius: 8px !important;
+        border: 1px solid var(--tweener-gray-200) !important;
+    }
+    
+    .stMetric label {
+        color: var(--tweener-gray-600) !important;
+        font-weight: 600 !important;
+    }
+    
+    .stMetric div[data-testid="metric-value"] {
+        color: #6B5B73 !important;
+        font-weight: 400 !important;
+    }
+    
+    /* Additional ultra-specific selectors for maximum visibility */
+    .stMetric * {
+        color: #6B5B73 !important;
+        font-weight: 400 !important;
+    }
+    
+    .stMetric label {
+        color: var(--tweener-gray-600) !important;
+        font-weight: 600 !important;
+    }
+    
+    /* Nuclear option - force all metric numbers to be brownish-grey */
+    [data-testid="metric-container"] * div * {
+        color: #6B5B73 !important;
+        font-weight: 400 !important;
+    }
+    
+    .stMetric div[data-testid="metric-value"] {
+        color: #6B5B73 !important;
+        font-weight: 400 !important;
+    }
+    
     .main > div {
         padding-top: 2rem;
         max-width: 1200px;
@@ -76,6 +128,23 @@ st.markdown("""
         font-weight: 700 !important;
         border-bottom: 3px solid var(--tweener-primary) !important;
         padding-bottom: 0.5rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    /* Logo and header layout */
+    .stImage > img {
+        border-radius: 8px !important;
+        box-shadow: 0 2px 8px rgba(79, 209, 199, 0.2) !important;
+    }
+    
+    /* Header container styling */
+    .main > div > div:first-child {
+        background: linear-gradient(135deg, white 0%, var(--tweener-gray-50) 100%) !important;
+        padding: 1.5rem !important;
+        border-radius: 12px !important;
+        margin-bottom: 2rem !important;
+        border: 1px solid var(--tweener-gray-200) !important;
+        box-shadow: 0 2px 4px rgba(79, 209, 199, 0.1) !important;
     }
     
     h2 {
@@ -99,10 +168,33 @@ st.markdown("""
         transform: translateY(-1px) !important;
     }
     
-    [data-testid="metric-container"] * {
-        color: var(--tweener-gray-800) !important;
+    /* Metric label styling - ensure visibility */
+    [data-testid="metric-container"] > div > div:first-child {
+        color: var(--tweener-gray-600) !important;
+        font-weight: 600 !important;
+        font-size: 0.875rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        margin-bottom: 0.5rem !important;
     }
     
+    /* Metric value styling - large and visible */
+    [data-testid="metric-container"] > div > div:nth-child(2) {
+        color: #6B5B73 !important;
+        font-weight: 400 !important;
+        font-size: 2rem !important;
+        line-height: 1.2 !important;
+    }
+    
+    /* Metric delta styling if present */
+    [data-testid="metric-container"] > div > div:nth-child(3) {
+        color: var(--tweener-gray-600) !important;
+        font-weight: 500 !important;
+        font-size: 0.875rem !important;
+        margin-top: 0.25rem !important;
+    }
+    
+    /* Alternative selector for metric labels */
     [data-testid="metric-container"] label {
         color: var(--tweener-gray-600) !important;
         font-weight: 600 !important;
@@ -111,10 +203,49 @@ st.markdown("""
         letter-spacing: 0.5px !important;
     }
     
+    /* Alternative selector for metric values */
     [data-testid="metric-container"] [data-testid="metric-value"] {
-        color: var(--tweener-primary) !important;
-        font-weight: 700 !important;
+        color: #6B5B73 !important;
+        font-weight: 400 !important;
         font-size: 2rem !important;
+    }
+    
+    /* Ensure all text in metrics is visible */
+    [data-testid="metric-container"] div[data-testid="metric-value"] {
+        color: #6B5B73 !important;
+        font-weight: 400 !important;
+        font-size: 2rem !important;
+    }
+    
+    [data-testid="metric-container"] div[data-testid="metric-label"] {
+        color: var(--tweener-gray-600) !important;
+        font-weight: 600 !important;
+        font-size: 0.875rem !important;
+    }
+    
+    /* Additional fallback selectors for metric values */
+    .stMetric > div > div:nth-child(2) {
+        color: #6B5B73 !important;
+        font-weight: 400 !important;
+        font-size: 2rem !important;
+    }
+    
+    /* Target the actual value element more specifically */
+    [data-testid="metric-container"] span {
+        color: #6B5B73 !important;
+        font-weight: 400 !important;
+    }
+    
+    /* Override any Streamlit default styling */
+    .stMetric [data-testid="metric-value"] {
+        color: #6B5B73 !important;
+        font-weight: 400 !important;
+        font-size: 2rem !important;
+    }
+    
+    .stMetric div[data-testid="metric-value"] {
+        color: #6B5B73 !important;
+        font-weight: 400 !important;
     }
     
     /* Sidebar with Tweener dark green styling */
@@ -295,7 +426,7 @@ def load_financial_data():
             data.append({
                 'id': metric.id,
                 'company_name': metric.company.name,
-                'reporting_period': metric.reporting_period or 'N/A',
+                'reporting_period': metric.reporting_period or '-',
                 'reporting_date': metric.reporting_date,
                 'extracted_date': metric.extracted_date,
                 'mrr': metric.mrr,
@@ -357,7 +488,7 @@ def load_financial_data():
 
 def parse_financial_value(value):
     """Parse financial values like '$1.2M', '~$8.000M' to numeric"""
-    if pd.isna(value) or value == 'N/A' or not value:
+    if pd.isna(value) or value == '-' or not value:
         return None
     
     # Remove common prefixes and suffixes
@@ -424,10 +555,20 @@ def create_arr_chart(df):
         xaxis_tickformat='$,.0f',
         plot_bgcolor='white',
         paper_bgcolor='white',
-        font=dict(family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", color='#2d3748'),
+        font=dict(family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", color='#1a202c'),
         title_font=dict(size=18, color='#4fd1c7', family="Inter, sans-serif"),
-        xaxis=dict(gridcolor='#edf2f7', showgrid=True),
-        yaxis=dict(gridcolor='#edf2f7', showgrid=True)
+        xaxis=dict(
+            gridcolor='#edf2f7', 
+            showgrid=True,
+            tickfont=dict(color='#1a202c', size=12),
+            title=dict(font=dict(color='#1a202c', size=14, family="Inter, sans-serif"))
+        ),
+        yaxis=dict(
+            gridcolor='#edf2f7', 
+            showgrid=True,
+            tickfont=dict(color='#1a202c', size=12),
+            title=dict(font=dict(color='#1a202c', size=14, family="Inter, sans-serif"))
+        )
     )
     
     return fig
@@ -440,7 +581,7 @@ def create_growth_chart(df):
     # Parse growth values
     df_growth = df.copy()
     df_growth['arr_growth_numeric'] = df_growth['arr_growth'].apply(
-        lambda x: float(str(x).replace('%', '').replace('+', '')) if pd.notna(x) and x != 'N/A' and '%' in str(x) else None
+        lambda x: float(str(x).replace('%', '').replace('+', '')) if pd.notna(x) and x != '-' and '%' in str(x) else None
     )
     
     df_growth = df_growth.dropna(subset=['arr_growth_numeric'])
@@ -476,10 +617,20 @@ def create_growth_chart(df):
         showlegend=False,
         plot_bgcolor='white',
         paper_bgcolor='white',
-        font=dict(family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", color='#2d3748'),
+        font=dict(family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", color='#1a202c'),
         title_font=dict(size=18, color='#4fd1c7', family="Inter, sans-serif"),
-        xaxis=dict(gridcolor='#edf2f7', showgrid=True),
-        yaxis=dict(gridcolor='#edf2f7', showgrid=True)
+        xaxis=dict(
+            gridcolor='#edf2f7', 
+            showgrid=True,
+            tickfont=dict(color='#1a202c', size=12),
+            title=dict(font=dict(color='#1a202c', size=14, family="Inter, sans-serif"))
+        ),
+        yaxis=dict(
+            gridcolor='#edf2f7', 
+            showgrid=True,
+            tickfont=dict(color='#1a202c', size=12),
+            title=dict(font=dict(color='#1a202c', size=14, family="Inter, sans-serif"))
+        )
     )
     
     return fig
@@ -492,31 +643,46 @@ def create_cash_runway_chart(df):
     # Parse cash and runway values
     df_cash = df.copy()
     df_cash['cash_numeric'] = df_cash['cash_balance'].apply(parse_financial_value)
-    def parse_runway_value(value):
-        """Parse runway values like '12 months', '12-18', '6+' to numeric"""
-        if pd.isna(value) or value == 'N/A' or not value:
+    
+    # Create a robust runway parsing function
+    def safe_parse_runway(value):
+        """Safely parse runway values like '12 months', '12-18', '6+' to numeric"""
+        if pd.isna(value) or value == '-' or not value:
             return None
         
-        # Convert to string and clean
-        clean_value = str(value).replace('months', '').replace('month', '').replace('+', '').strip()
-        
-        # Handle ranges like "12-18" - take the midpoint
-        if '-' in clean_value:
-            try:
-                parts = clean_value.split('-')
-                if len(parts) == 2:
-                    return (float(parts[0]) + float(parts[1])) / 2
-            except:
-                pass
-        
-        # Handle single values
         try:
-            return float(clean_value)
-        except:
+            # Convert to string and clean basic formatting
+            clean_value = str(value).lower()
+            clean_value = clean_value.replace('months', '').replace('month', '').replace('+', '').strip()
+            
+            # Handle empty after cleaning
+            if not clean_value:
+                return None
+            
+            # Handle ranges like "12-18" - take the midpoint
+            if '-' in clean_value:
+                try:
+                    parts = [p.strip() for p in clean_value.split('-')]
+                    if len(parts) == 2 and parts[0] and parts[1]:
+                        num1 = float(parts[0])
+                        num2 = float(parts[1])
+                        return (num1 + num2) / 2
+                except (ValueError, IndexError):
+                    pass
+            
+            # Handle single numeric values
+            try:
+                return float(clean_value)
+            except ValueError:
+                return None
+                
+        except Exception:
             return None
     
-    df_cash['runway_numeric'] = df_cash['runway_months'].apply(parse_runway_value)
+    # Apply the safe parsing function
+    df_cash['runway_numeric'] = df_cash['runway_months'].apply(safe_parse_runway)
     
+    # Remove rows where we couldn't parse both cash and runway
     df_cash = df_cash.dropna(subset=['cash_numeric', 'runway_numeric'])
     
     if df_cash.empty:
@@ -551,18 +717,40 @@ def create_cash_runway_chart(df):
         xaxis_tickformat='$,.0f',
         plot_bgcolor='white',
         paper_bgcolor='white',
-        font=dict(family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", color='#2d3748'),
+        font=dict(family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", color='#1a202c'),
         title_font=dict(size=18, color='#4fd1c7', family="Inter, sans-serif"),
-        xaxis=dict(gridcolor='#edf2f7', showgrid=True),
-        yaxis=dict(gridcolor='#edf2f7', showgrid=True)
+        xaxis=dict(
+            gridcolor='#edf2f7', 
+            showgrid=True,
+            tickfont=dict(color='#1a202c', size=12),
+            title=dict(font=dict(color='#1a202c', size=14, family="Inter, sans-serif"))
+        ),
+        yaxis=dict(
+            gridcolor='#edf2f7', 
+            showgrid=True,
+            tickfont=dict(color='#1a202c', size=12),
+            title=dict(font=dict(color='#1a202c', size=14, family="Inter, sans-serif"))
+        )
     )
     
     return fig
 
 def main():
-    # Header
-    st.title("💰 Financial Metrics Dashboard")
-    st.markdown("**Portfolio Company Financial Performance Tracking**")
+    # Header with Tweener Fund Logo
+    col1, col2 = st.columns([1, 4])
+    
+    with col1:
+        # Display the Tweener Fund logo
+        try:
+            st.image("dashboard/design/tweener_logo.png", width=120)
+        except:
+            # Fallback if logo file not found
+            st.markdown("🏢")
+    
+    with col2:
+        st.title("Tweener Insights")
+        st.markdown("**Generative Portfolio Intelligence for Triangle Tweener Fund**")
+    
     st.markdown("---")
     
     # Load data
@@ -572,30 +760,23 @@ def main():
     # Overview Statistics
     st.header("📊 Portfolio Overview")
     
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.metric(
-            label="Total Metrics",
-            value=stats['total_metrics'],
-            help="Total number of financial records extracted"
-        )
-    
-    with col2:
         st.metric(
             label="Companies Tracked",
             value=f"{stats['companies_with_metrics']}/{stats['total_companies']}",
             help="Portfolio companies with financial metrics"
         )
     
-    with col3:
+    with col2:
         st.metric(
             label="Portfolio Coverage",
             value=f"{stats['coverage_percent']}%",
             help="Percentage of portfolio companies with metrics"
         )
     
-    with col4:
+    with col3:
         st.metric(
             label="Recent Updates",
             value=stats['recent_metrics'],
@@ -704,11 +885,13 @@ def main():
             company_summary.append({
                 'Company': company,
                 'Latest Update': latest[date_col].strftime('%Y-%m-%d'),
-                'ARR': latest['arr'] if latest['arr'] != 'N/A' else '-',
-                'MRR': latest['mrr'] if latest['mrr'] != 'N/A' else '-',
-                'Cash Balance': latest['cash_balance'] if latest['cash_balance'] != 'N/A' else '-',
-                'Runway': latest['runway_months'] if latest['runway_months'] != 'N/A' else '-',
-                'Growth': latest['arr_growth'] if latest['arr_growth'] != 'N/A' else '-',
+                'ARR': latest['arr'] if latest['arr'] != '-' else '-',
+                'MRR': latest['mrr'] if latest['mrr'] != '-' else '-',
+                'Cash Balance': latest['cash_balance'] if latest['cash_balance'] != '-' else '-',
+                'Runway': latest['runway_months'] if latest['runway_months'] != '-' else '-',
+                'Growth': latest['arr_growth'] if latest['arr_growth'] != '-' else '-',
+                'Customers': latest['customer_count'] if latest['customer_count'] != '-' else '-',
+                'Team Size': latest['team_size'] if latest['team_size'] != '-' else '-',
                 'Data Quality': latest['extraction_confidence'],
                 'Records': len(company_data)
             })
