@@ -37,22 +37,24 @@ st.set_page_config(
 # Tweener Fund Brand Colors - Custom CSS
 st.markdown("""
 <style>
-    /* Tweener Fund Brand Theme */
+    /* Tweener Fund Brand Theme - Actual Website Colors */
     :root {
-        --tweener-primary: #2563eb;     /* Blue from Tweener Fund */
-        --tweener-secondary: #1e40af;   /* Darker blue */
-        --tweener-accent: #3b82f6;      /* Light blue */
-        --tweener-success: #059669;     /* Green for positive metrics */
-        --tweener-warning: #d97706;     /* Orange for warnings */
-        --tweener-danger: #dc2626;      /* Red for negative metrics */
-        --tweener-gray-50: #f9fafb;
-        --tweener-gray-100: #f3f4f6;
-        --tweener-gray-200: #e5e7eb;
-        --tweener-gray-300: #d1d5db;
-        --tweener-gray-600: #4b5563;
-        --tweener-gray-700: #374151;
-        --tweener-gray-800: #1f2937;
-        --tweener-gray-900: #111827;
+        --tweener-primary: #4fd1c7;     /* Teal/Turquoise from logo */
+        --tweener-secondary: #38b2ac;   /* Darker teal */
+        --tweener-accent: #81e6d9;      /* Light teal */
+        --tweener-dark-green: #2d5016;  /* Dark green from footer */
+        --tweener-orange: #ed8936;      /* Orange from Invest button */
+        --tweener-success: #48bb78;     /* Green for positive metrics */
+        --tweener-warning: #ed8936;     /* Orange for warnings */
+        --tweener-danger: #f56565;      /* Red for negative metrics */
+        --tweener-gray-50: #f7fafc;
+        --tweener-gray-100: #edf2f7;
+        --tweener-gray-200: #e2e8f0;
+        --tweener-gray-300: #cbd5e0;
+        --tweener-gray-600: #718096;
+        --tweener-gray-700: #4a5568;
+        --tweener-gray-800: #2d3748;
+        --tweener-gray-900: #1a202c;
     }
     
     /* App-level styling with Tweener brand colors */
@@ -87,13 +89,13 @@ st.markdown("""
         border: 1px solid var(--tweener-gray-200) !important;
         border-radius: 12px !important;
         padding: 1.5rem !important;
-        box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1) !important;
+        box-shadow: 0 2px 4px rgba(79, 209, 199, 0.1) !important;
         border-left: 4px solid var(--tweener-primary) !important;
         transition: all 0.2s ease !important;
     }
     
     [data-testid="metric-container"]:hover {
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15) !important;
+        box-shadow: 0 4px 12px rgba(79, 209, 199, 0.15) !important;
         transform: translateY(-1px) !important;
     }
     
@@ -115,9 +117,9 @@ st.markdown("""
         font-size: 2rem !important;
     }
     
-    /* Sidebar with Tweener styling */
+    /* Sidebar with Tweener dark green styling */
     div[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, var(--tweener-primary) 0%, var(--tweener-secondary) 100%) !important;
+        background: linear-gradient(180deg, var(--tweener-dark-green) 0%, #1a4009 100%) !important;
         border-right: 3px solid var(--tweener-primary) !important;
     }
     
@@ -199,9 +201,9 @@ st.markdown("""
         border-color: var(--tweener-gray-200) !important;
     }
     
-    /* Button styling */
+    /* Button styling with orange theme */
     .stButton > button {
-        background-color: var(--tweener-primary) !important;
+        background-color: var(--tweener-orange) !important;
         color: white !important;
         border: none !important;
         border-radius: 8px !important;
@@ -211,9 +213,9 @@ st.markdown("""
     }
     
     .stButton > button:hover {
-        background-color: var(--tweener-secondary) !important;
+        background-color: #dd7324 !important;
         transform: translateY(-1px) !important;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
+        box-shadow: 0 4px 12px rgba(237, 137, 54, 0.3) !important;
     }
     
     /* Success/Warning/Error colors for metrics */
@@ -240,19 +242,19 @@ st.markdown("""
     
     /* Info boxes */
     .stInfo {
-        background-color: rgba(37, 99, 235, 0.1) !important;
+        background-color: rgba(79, 209, 199, 0.1) !important;
         border-left: 4px solid var(--tweener-primary) !important;
         border-radius: 8px !important;
     }
     
     .stWarning {
-        background-color: rgba(217, 119, 6, 0.1) !important;
+        background-color: rgba(237, 137, 54, 0.1) !important;
         border-left: 4px solid var(--tweener-warning) !important;
         border-radius: 8px !important;
     }
     
     .stError {
-        background-color: rgba(220, 38, 38, 0.1) !important;
+        background-color: rgba(245, 101, 101, 0.1) !important;
         border-left: 4px solid var(--tweener-danger) !important;
         border-radius: 8px !important;
     }
@@ -265,7 +267,7 @@ st.markdown("""
     
     .stTextInput > div > div:focus {
         border-color: var(--tweener-primary) !important;
-        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2) !important;
+        box-shadow: 0 0 0 2px rgba(79, 209, 199, 0.2) !important;
     }
     
     /* Divider styling */
@@ -395,14 +397,14 @@ def create_arr_chart(df):
     latest_arr = df_arr.loc[df_arr.groupby('company_name')[date_col].idxmax()]
     latest_arr = latest_arr.sort_values('arr_numeric', ascending=True)
     
-    # Tweener Fund brand color scale
+    # Tweener Fund brand color scale - Teal theme
     tweener_color_scale = [
-        [0.0, '#f8fafc'],    # Very light gray
-        [0.2, '#dbeafe'],    # Light blue
-        [0.4, '#93c5fd'],    # Medium light blue
-        [0.6, '#60a5fa'],    # Medium blue
-        [0.8, '#3b82f6'],    # Tweener accent blue
-        [1.0, '#2563eb']     # Tweener primary blue
+        [0.0, '#f7fafc'],    # Very light gray
+        [0.2, '#c6f7e9'],    # Light teal
+        [0.4, '#9decdb'],    # Medium light teal
+        [0.6, '#81e6d9'],    # Medium teal
+        [0.8, '#4fd1c7'],    # Tweener accent teal
+        [1.0, '#38b2ac']     # Tweener primary teal
     ]
     
     fig = px.bar(
@@ -422,10 +424,10 @@ def create_arr_chart(df):
         xaxis_tickformat='$,.0f',
         plot_bgcolor='white',
         paper_bgcolor='white',
-        font=dict(family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", color='#1f2937'),
-        title_font=dict(size=18, color='#2563eb', family="Inter, sans-serif"),
-        xaxis=dict(gridcolor='#f3f4f6', showgrid=True),
-        yaxis=dict(gridcolor='#f3f4f6', showgrid=True)
+        font=dict(family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", color='#2d3748'),
+        title_font=dict(size=18, color='#4fd1c7', family="Inter, sans-serif"),
+        xaxis=dict(gridcolor='#edf2f7', showgrid=True),
+        yaxis=dict(gridcolor='#edf2f7', showgrid=True)
     )
     
     return fig
@@ -451,7 +453,7 @@ def create_growth_chart(df):
     latest_growth = latest_growth.sort_values('arr_growth_numeric', ascending=False)
     
     # Tweener Fund brand colors for positive/negative growth
-    colors = ['#059669' if x > 0 else '#dc2626' for x in latest_growth['arr_growth_numeric']]
+    colors = ['#48bb78' if x > 0 else '#f56565' for x in latest_growth['arr_growth_numeric']]
     
     fig = go.Figure(data=[
         go.Bar(
@@ -474,10 +476,10 @@ def create_growth_chart(df):
         showlegend=False,
         plot_bgcolor='white',
         paper_bgcolor='white',
-        font=dict(family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", color='#1f2937'),
-        title_font=dict(size=18, color='#2563eb', family="Inter, sans-serif"),
-        xaxis=dict(gridcolor='#f3f4f6', showgrid=True),
-        yaxis=dict(gridcolor='#f3f4f6', showgrid=True)
+        font=dict(family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", color='#2d3748'),
+        title_font=dict(size=18, color='#4fd1c7', family="Inter, sans-serif"),
+        xaxis=dict(gridcolor='#edf2f7', showgrid=True),
+        yaxis=dict(gridcolor='#edf2f7', showgrid=True)
     )
     
     return fig
@@ -534,9 +536,9 @@ def create_cash_runway_chart(df):
         textposition='top center',
         marker=dict(
             size=12, 
-            color='#2563eb', 
+            color='#4fd1c7', 
             opacity=0.8,
-            line=dict(color='#1e40af', width=2)
+            line=dict(color='#38b2ac', width=2)
         ),
         name='Companies'
     ))
@@ -549,10 +551,10 @@ def create_cash_runway_chart(df):
         xaxis_tickformat='$,.0f',
         plot_bgcolor='white',
         paper_bgcolor='white',
-        font=dict(family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", color='#1f2937'),
-        title_font=dict(size=18, color='#2563eb', family="Inter, sans-serif"),
-        xaxis=dict(gridcolor='#f3f4f6', showgrid=True),
-        yaxis=dict(gridcolor='#f3f4f6', showgrid=True)
+        font=dict(family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", color='#2d3748'),
+        title_font=dict(size=18, color='#4fd1c7', family="Inter, sans-serif"),
+        xaxis=dict(gridcolor='#edf2f7', showgrid=True),
+        yaxis=dict(gridcolor='#edf2f7', showgrid=True)
     )
     
     return fig
