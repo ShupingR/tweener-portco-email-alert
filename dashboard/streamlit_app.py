@@ -420,35 +420,41 @@ def load_financial_data():
             FinancialMetrics.extracted_date.desc()
         ).all()
         
+        # Helper function to clean values and replace N/A with dashes
+        def clean_value(value):
+            if value is None or value == '' or str(value).upper() == 'N/A':
+                return '-'
+            return str(value).strip()
+        
         # Convert to DataFrame
         data = []
         for metric in query:
             data.append({
                 'id': metric.id,
                 'company_name': metric.company.name,
-                'reporting_period': metric.reporting_period or '-',
+                'reporting_period': clean_value(metric.reporting_period),
                 'reporting_date': metric.reporting_date,
                 'extracted_date': metric.extracted_date,
-                'mrr': metric.mrr,
-                'arr': metric.arr,
-                'qrr': metric.qrr,
-                'total_revenue': metric.total_revenue,
-                'cash_balance': metric.cash_balance,
-                'net_burn': metric.net_burn,
-                'gross_burn': metric.gross_burn,
-                'runway_months': metric.runway_months,
-                'customer_count': metric.customer_count,
-                'team_size': metric.team_size,
-                'arr_growth': metric.arr_growth,
-                'mrr_growth': metric.mrr_growth,
-                'revenue_growth_yoy': metric.revenue_growth_yoy,
-                'gross_margin': metric.gross_margin,
-                'key_highlights': metric.key_highlights,
-                'key_challenges': metric.key_challenges,
-                'funding_status': metric.funding_status,
-                'source_type': metric.source_type,
-                'source_file': metric.source_file,
-                'extraction_confidence': metric.extraction_confidence
+                'mrr': clean_value(metric.mrr),
+                'arr': clean_value(metric.arr),
+                'qrr': clean_value(metric.qrr),
+                'total_revenue': clean_value(metric.total_revenue),
+                'cash_balance': clean_value(metric.cash_balance),
+                'net_burn': clean_value(metric.net_burn),
+                'gross_burn': clean_value(metric.gross_burn),
+                'runway_months': clean_value(metric.runway_months),
+                'customer_count': clean_value(metric.customer_count),
+                'team_size': clean_value(metric.team_size),
+                'arr_growth': clean_value(metric.arr_growth),
+                'mrr_growth': clean_value(metric.mrr_growth),
+                'revenue_growth_yoy': clean_value(metric.revenue_growth_yoy),
+                'gross_margin': clean_value(metric.gross_margin),
+                'key_highlights': clean_value(metric.key_highlights),
+                'key_challenges': clean_value(metric.key_challenges),
+                'funding_status': clean_value(metric.funding_status),
+                'source_type': clean_value(metric.source_type),
+                'source_file': clean_value(metric.source_file),
+                'extraction_confidence': clean_value(metric.extraction_confidence)
             })
         
         df = pd.DataFrame(data)
