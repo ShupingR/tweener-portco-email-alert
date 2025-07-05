@@ -1,16 +1,6 @@
-# System packages required for Streamlit Community Cloud deployment
-# These are installed via apt-get
-
-# For database operations
 sqlite3
-
-# For file processing
 unzip
 zip
-
-# For email processing
 ca-certificates
-
-# For Python packages that need system libraries
 build-essential
 python3-dev 
