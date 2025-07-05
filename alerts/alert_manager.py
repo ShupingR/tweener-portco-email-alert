@@ -31,12 +31,10 @@ from models import Company, Contact, EmailUpdate, Alert, Base
 load_dotenv()
 
 class AlertSystem:
-    def __init__(self, db_path="tracker.db"):
+    def __init__(self):
         """Initialize the alert system with database connection."""
-        self.engine = create_engine(f"sqlite:///{db_path}")
-        Base.metadata.create_all(self.engine)
-        Session = sessionmaker(bind=self.engine)
-        self.session = Session()
+        from database.connection import SessionLocal
+        self.session = SessionLocal()
         
         # Email configuration
         self.smtp_server = "smtp.gmail.com"
@@ -316,7 +314,7 @@ This is an urgent automated escalation. Immediate response required.
         
         # Get alert statistics
         total_companies = self.session.query(Company).count()
-        companies_with_emails = self.session.query(func.count(func.distinct(EmailUpdate.company_id))).scalar()
+        companies_with_emails = self.session.query(EmailUpdate.company_id).distinct().count()
         companies_without_emails = total_companies - companies_with_emails
         
         # Recent alerts

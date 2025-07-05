@@ -1,6 +1,6 @@
 [theme]
 # Primary accent color for interactive elements
-primaryColor = "#40E0D0"  # Turquoise
+primaryColor = "#4fd1c7"  # Tweener Fund teal
 
 # Background color for the main content area
 backgroundColor = "#0E1117"
@@ -24,9 +24,22 @@ enableCORS = true
 # Enable hot reloading
 runOnSave = true
 
+# Headless mode for cloud deployment
+headless = true
+
+# Max upload size (100MB)
+maxUploadSize = 100
+
 [browser]
 # Internet address where users should point their browsers to connect to the app
 serverAddress = "0.0.0.0"
 
 # Whether to send Streamlit usage stats
 gatherUsageStats = false
+
+[client]
+# Show error details
+showErrorDetails = false
+
+# Toolbar mode
+toolbarMode = "minimal"

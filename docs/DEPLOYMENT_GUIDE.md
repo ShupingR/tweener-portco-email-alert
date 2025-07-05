@@ -226,7 +226,7 @@ gcloud logs read --service=tweener-insights --limit=20
 
 1. **Environment Variables**: Store secrets in Secret Manager
 2. **HTTPS**: Cloud Run provides HTTPS by default
-3. **Access Control**: Dashboard is accessible without authentication
+3. **Authentication**: Consider adding authentication if needed
 4. **Database**: Use Cloud SQL or secure external database
 
 ## Next Steps
@@ -234,7 +234,7 @@ gcloud logs read --service=tweener-insights --limit=20
 1. **Set up monitoring** and alerting
 2. **Configure custom domain** (if needed)
 3. **Set up CI/CD** pipeline
-4. **Configure access control** (if needed)
+4. **Implement authentication** (if required)
 5. **Optimize performance** based on usage patterns
 
 ## Support

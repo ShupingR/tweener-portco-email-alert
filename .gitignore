@@ -8,10 +8,80 @@ env/
 
 # Python cache files
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
+*.so
 .Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
 
 # Database files (contains actual data)
 *.db
@@ -69,4 +139,25 @@ scot_data/*.csv
 
 # Keep the directory structure but ignore the actual data files
 scot_data/*
-!scot_data/.gitkeep 
+!scot_data/.gitkeep
+
+# Secrets and configuration
+.streamlit/secrets.toml
+.env.local
+.env.production
+
+# Email attachments
+*.pdf
+*.docx
+*.xlsx
+*.pptx
+*.jpg
+*.jpeg
+*.png
+*.gif
+
+# Database migrations (if using Alembic)
+migrations/versions/
+
+# Streamlit
+.streamlit/secrets.toml 

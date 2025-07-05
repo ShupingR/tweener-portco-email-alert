@@ -553,40 +553,18 @@ The dashboard shows detailed financial metrics, growth rates, and operational da
 Just ask me a question about our portfolio companies!"""
     
     def _parse_financial_value(self, value_str):
-        """Parse financial values like '$1.2M' or '$50K' to numbers"""
-        if not value_str or value_str in ['N/A', '-']:
-            return 0
-        
-        try:
-            # Remove currency symbols and spaces
-            clean_str = str(value_str).replace('$', '').replace(',', '').strip()
-            
-            # Handle K/M suffixes
-            if clean_str.upper().endswith('K'):
-                return float(clean_str[:-1]) * 1000
-            elif clean_str.upper().endswith('M'):
-                return float(clean_str[:-1]) * 1000000
-            else:
-                return float(clean_str)
-        except:
-            return 0
+        """Parse financial values using centralized formatter"""
+        from utils.financial_formatter import FinancialMetricsFormatter
+        formatter = FinancialMetricsFormatter()
+        parsed = formatter.parse_currency(value_str)
+        return parsed if parsed is not None else 0
     
     def _parse_runway_months(self, runway_str):
-        """Parse runway months from strings like '12-18' or '12 months'"""
-        if not runway_str or runway_str in ['N/A', '-']:
-            return 0
-        
-        try:
-            runway_str = str(runway_str).replace('months', '').strip()
-            
-            # Handle range values like "12-18"
-            if '-' in runway_str:
-                parts = runway_str.split('-')
-                return (float(parts[0]) + float(parts[1])) / 2
-            else:
-                return float(runway_str)
-        except:
-            return 0
+        """Parse runway months using centralized formatter"""
+        from utils.financial_formatter import FinancialMetricsFormatter
+        formatter = FinancialMetricsFormatter()
+        parsed = formatter.parse_runway(runway_str)
+        return parsed if parsed is not None else 0
 
 def main():
     # Simple header
