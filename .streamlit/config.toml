@@ -1,0 +1,32 @@
+[theme]
+# Primary accent color for interactive elements
+primaryColor = "#40E0D0"  # Turquoise
+
+# Background color for the main content area
+backgroundColor = "#0E1117"
+
+# Background color for sidebar and most interactive widgets
+secondaryBackgroundColor = "#262730"
+
+# Color used for almost all text
+textColor = "#FAFAFA"
+
+# Font family for all text in the app
+font = "sans serif"
+
+[server]
+# Port to use for the app
+port = 8501
+
+# Enable CORS protection
+enableCORS = true
+
+# Enable hot reloading
+runOnSave = true
+
+[browser]
+# Internet address where users should point their browsers to connect to the app
+serverAddress = "0.0.0.0"
+
+# Whether to send Streamlit usage stats
+gatherUsageStats = false
