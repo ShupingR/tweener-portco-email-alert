@@ -29,10 +29,10 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Apply the same styling as the main dashboard
+# Apply theme-responsive styling
 st.markdown("""
 <style>
-    /* Tweener Fund Brand Theme */
+    /* Tweener Fund Brand Theme - Theme Responsive */
     :root {
         --tweener-primary: #4fd1c7;
         --tweener-secondary: #38b2ac;
@@ -42,58 +42,77 @@ st.markdown("""
         --tweener-success: #48bb78;
         --tweener-warning: #ed8936;
         --tweener-danger: #f56565;
-        --tweener-gray-50: #f7fafc;
-        --tweener-gray-100: #edf2f7;
-        --tweener-gray-200: #e2e8f0;
-        --tweener-gray-300: #cbd5e0;
-        --tweener-gray-600: #718096;
-        --tweener-gray-700: #4a5568;
-        --tweener-gray-800: #2d3748;
-        --tweener-gray-900: #1a202c;
     }
     
+    /* Theme-responsive styling that works with Streamlit's dark/light mode */
     .stApp {
-        background-color: var(--tweener-gray-50) !important;
-        color: var(--tweener-gray-800) !important;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
     }
     
-    .main .element-container * {
-        color: var(--tweener-gray-800) !important;
-    }
-    
+    /* Header styling - theme responsive */
     h1 {
-        color: var(--tweener-primary) !important;
-        font-weight: 700 !important;
-        border-bottom: 3px solid var(--tweener-primary) !important;
-        padding-bottom: 0.5rem !important;
-        margin-bottom: 0.5rem !important;
+        color: var(--tweener-primary);
+        font-weight: 700;
+        border-bottom: 3px solid var(--tweener-primary);
+        padding-bottom: 0.5rem;
+        margin-bottom: 0.5rem;
     }
     
+    /* Button styling - theme responsive */
     .stButton > button {
-        background-color: var(--tweener-orange) !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 8px !important;
-        font-weight: 600 !important;
-        padding: 0.5rem 1.5rem !important;
-        transition: all 0.2s ease !important;
+        background-color: var(--tweener-orange);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 0.5rem 1.5rem;
+        transition: all 0.2s ease;
     }
     
     .stButton > button:hover {
-        background-color: #dd7324 !important;
-        transform: translateY(-1px) !important;
-        box-shadow: 0 4px 12px rgba(237, 137, 54, 0.3) !important;
+        background-color: #dd7324;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(237, 137, 54, 0.3);
     }
     
+    /* Text input styling - theme responsive */
     .stTextInput > div > div {
-        border-radius: 8px !important;
-        border: 2px solid var(--tweener-gray-200) !important;
+        border-radius: 8px;
+        border: 2px solid;
+        border-color: rgba(49, 51, 63, 0.2);
     }
     
     .stTextInput > div > div:focus {
-        border-color: var(--tweener-primary) !important;
-        box-shadow: 0 0 0 2px rgba(79, 209, 199, 0.2) !important;
+        border-color: var(--tweener-primary);
+        box-shadow: 0 0 0 2px rgba(79, 209, 199, 0.2);
+    }
+    
+    /* Chat message styling - theme responsive */
+    .chat-message {
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0 0.5rem 2rem;
+        border-left: 4px solid var(--tweener-secondary);
+    }
+    
+    .chat-message.user {
+        background: var(--tweener-primary);
+        color: white;
+    }
+    
+    .chat-message.assistant {
+        background: rgba(49, 51, 63, 0.05);
+        color: inherit;
+    }
+    
+    /* Welcome message styling - theme responsive */
+    .welcome-message {
+        background: linear-gradient(135deg, var(--tweener-primary), var(--tweener-secondary));
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        text-align: center;
+        margin-bottom: 2rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -155,7 +174,7 @@ class DatabaseChatbot:
     def _handle_company_queries(self, question):
         """Handle company-related queries"""
         try:
-            companies = self.session.query(Company).all()
+            companies = self.session.query(Company).filter(Company.is_tweener_portfolio == True).all()
             
             if "how many" in question or "count" in question:
                 total_companies = len(companies)
@@ -183,8 +202,10 @@ class DatabaseChatbot:
     def _handle_financial_queries(self, question):
         """Handle financial metrics queries"""
         try:
-            # Get latest financial metrics
-            latest_metrics = self.session.query(FinancialMetrics).order_by(FinancialMetrics.extracted_date.desc()).limit(10).all()
+            # Get latest financial metrics (only portfolio companies)
+            latest_metrics = self.session.query(FinancialMetrics).join(Company).filter(
+                Company.is_tweener_portfolio == True
+            ).order_by(FinancialMetrics.extracted_date.desc()).limit(10).all()
             
             if not latest_metrics:
                 return "No financial metrics data available yet."
@@ -214,7 +235,8 @@ class DatabaseChatbot:
     def _handle_growth_queries(self, question):
         """Handle growth-related queries"""
         try:
-            growth_data = self.session.query(FinancialMetrics).filter(
+            growth_data = self.session.query(FinancialMetrics).join(Company).filter(
+                Company.is_tweener_portfolio == True,
                 FinancialMetrics.arr_growth.isnot(None),
                 FinancialMetrics.arr_growth != 'N/A',
                 FinancialMetrics.arr_growth != '-'
@@ -248,7 +270,8 @@ class DatabaseChatbot:
     def _handle_cash_queries(self, question):
         """Handle cash and runway queries"""
         try:
-            cash_data = self.session.query(FinancialMetrics).filter(
+            cash_data = self.session.query(FinancialMetrics).join(Company).filter(
+                Company.is_tweener_portfolio == True,
                 FinancialMetrics.cash_balance.isnot(None),
                 FinancialMetrics.cash_balance != 'N/A',
                 FinancialMetrics.cash_balance != '-'
@@ -276,7 +299,8 @@ class DatabaseChatbot:
         """Handle team size and customer queries"""
         try:
             if "team" in question or "employees" in question:
-                team_data = self.session.query(FinancialMetrics).filter(
+                team_data = self.session.query(FinancialMetrics).join(Company).filter(
+                    Company.is_tweener_portfolio == True,
                     FinancialMetrics.team_size.isnot(None),
                     FinancialMetrics.team_size != 'N/A',
                     FinancialMetrics.team_size != '-'
@@ -289,7 +313,8 @@ class DatabaseChatbot:
                     return "No team size data available in recent metrics."
             
             elif "customer" in question:
-                customer_data = self.session.query(FinancialMetrics).filter(
+                customer_data = self.session.query(FinancialMetrics).join(Company).filter(
+                    Company.is_tweener_portfolio == True,
                     FinancialMetrics.customer_count.isnot(None),
                     FinancialMetrics.customer_count != 'N/A',
                     FinancialMetrics.customer_count != '-'
@@ -307,9 +332,12 @@ class DatabaseChatbot:
     def _handle_portfolio_overview(self):
         """Provide portfolio overview"""
         try:
-            total_companies = self.session.query(Company).count()
-            companies_with_metrics = self.session.query(FinancialMetrics.company_id).distinct().count()
-            recent_updates = self.session.query(FinancialMetrics).filter(
+            total_companies = self.session.query(Company).filter(Company.is_tweener_portfolio == True).count()
+            companies_with_metrics = self.session.query(FinancialMetrics).join(Company).filter(
+                Company.is_tweener_portfolio == True
+            ).distinct(FinancialMetrics.company_id).count()
+            recent_updates = self.session.query(FinancialMetrics).join(Company).filter(
+                Company.is_tweener_portfolio == True,
                 FinancialMetrics.extracted_date >= datetime.now() - timedelta(days=30)
             ).count()
             
@@ -329,7 +357,9 @@ The dashboard shows detailed financial metrics, growth rates, and operational da
     def _handle_recent_updates(self):
         """Show recent updates"""
         try:
-            recent = self.session.query(FinancialMetrics).order_by(
+            recent = self.session.query(FinancialMetrics).join(Company).filter(
+                Company.is_tweener_portfolio == True
+            ).order_by(
                 FinancialMetrics.extracted_date.desc()
             ).limit(5).all()
             
@@ -389,8 +419,9 @@ The dashboard shows detailed financial metrics, growth rates, and operational da
     def _get_top_companies_by_arr(self):
         """Get top 3 companies by ARR"""
         try:
-            # Get latest ARR data for each company
-            arr_data = self.session.query(FinancialMetrics).filter(
+            # Get latest ARR data for each company (only portfolio companies)
+            arr_data = self.session.query(FinancialMetrics).join(Company).filter(
+                Company.is_tweener_portfolio == True,
                 FinancialMetrics.arr.isnot(None),
                 FinancialMetrics.arr != 'N/A',
                 FinancialMetrics.arr != '-'
@@ -422,8 +453,9 @@ The dashboard shows detailed financial metrics, growth rates, and operational da
     def _get_top_companies_by_growth(self):
         """Get top 3 companies by growth rate"""
         try:
-            # Find companies with highest growth
-            growth_data = self.session.query(FinancialMetrics).filter(
+            # Find companies with highest growth (only portfolio companies)
+            growth_data = self.session.query(FinancialMetrics).join(Company).filter(
+                Company.is_tweener_portfolio == True,
                 FinancialMetrics.arr_growth.isnot(None),
                 FinancialMetrics.arr_growth != 'N/A',
                 FinancialMetrics.arr_growth != '-'
@@ -457,7 +489,10 @@ The dashboard shows detailed financial metrics, growth rates, and operational da
     def _get_company_details(self, company_name):
         """Get detailed information about a specific company"""
         try:
-            company = self.session.query(Company).filter(Company.name.ilike(f"%{company_name}%")).first()
+            company = self.session.query(Company).filter(
+                Company.is_tweener_portfolio == True,
+                Company.name.ilike(f"%{company_name}%")
+            ).first()
             if not company:
                 return f"Company '{company_name}' not found in our portfolio."
             
@@ -554,20 +589,9 @@ Just ask me a question about our portfolio companies!"""
             return 0
 
 def main():
-    # Header with Tweener Fund Logo (no problematic navigation button)
-    col1, col2 = st.columns([1, 4])
-    
-    with col1:
-        # Display the Tweener Fund logo
-        try:
-            st.image("design/tweener_logo.png", width=80)
-        except:
-            # Fallback if logo file not found
-            st.markdown("🏢")
-    
-    with col2:
-        st.title("🤖 Tweener Portfolio Assistant")
-        st.markdown("**Ask me anything about your Tweener Fund portfolio companies**")
+    # Simple header
+    st.title("🤖 Tweener Portfolio Assistant")
+    st.markdown("**Ask me anything about your Tweener Fund portfolio companies**")
     
     st.markdown("---")
     
@@ -581,7 +605,7 @@ def main():
     # Welcome message and instructions
     if not st.session_state.chat_history:
         st.markdown("""
-        <div style="background: linear-gradient(135deg, #4fd1c7, #38b2ac); color: white; padding: 2rem; border-radius: 12px; text-align: center; margin-bottom: 2rem;">
+        <div class="welcome-message">
             <h2 style="margin: 0; color: white;">👋 Welcome to Tweener Portfolio Assistant!</h2>
             <p style="margin: 0.5rem 0 0 0; color: white;">I'm your AI assistant for analyzing Tweener Fund portfolio companies. Ask me anything about financial metrics, growth rates, team sizes, and more!</p>
         </div>
@@ -645,17 +669,20 @@ def main():
         for i, (user_msg, bot_msg) in enumerate(reversed(st.session_state.chat_history)):
             # User message
             st.markdown(f"""
-            <div style="background: #4fd1c7; color: white; padding: 1rem; border-radius: 8px; margin: 1rem 0 0.5rem 2rem; border-left: 4px solid #38b2ac;">
+            <div class="chat-message user">
                 <strong>You:</strong> {user_msg}
             </div>
             """, unsafe_allow_html=True)
             
-            # Bot response
-            st.markdown(f"""
-            <div style="background: #f7fafc; color: #2d3748; padding: 1rem; border-radius: 8px; margin: 0.5rem 2rem 1rem 0; border-left: 4px solid #38b2ac;">
-                <strong>Assistant:</strong> {bot_msg}
+            # Bot response - use markdown container with styling
+            st.markdown("""
+            <div class="chat-message assistant">
+                <strong>Assistant:</strong>
             </div>
             """, unsafe_allow_html=True)
+            
+            # Display bot message as markdown to properly render formatting
+            st.markdown(bot_msg)
             
             if i < len(st.session_state.chat_history) - 1:
                 st.markdown("---")

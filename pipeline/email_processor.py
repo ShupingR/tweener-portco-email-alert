@@ -229,16 +229,16 @@ class ClaudeEmailProcessor:
                     
                     if filename:
                         # Decode filename if needed
-                            decoded_filename = decode_header(filename)
-                            if decoded_filename and decoded_filename[0]:
-                                if isinstance(decoded_filename[0][0], bytes):
-                                    try:
-                                        encoding = decoded_filename[0][1] or 'utf-8'
-                                        filename = decoded_filename[0][0].decode(encoding)
-                                    except:
-                                        filename = decoded_filename[0][0].decode('utf-8', errors='ignore')
-                                else:
-                                    filename = decoded_filename[0][0]
+                        decoded_filename = decode_header(filename)
+                        if decoded_filename and decoded_filename[0]:
+                            if isinstance(decoded_filename[0][0], bytes):
+                                try:
+                                    encoding = decoded_filename[0][1] or 'utf-8'
+                                    filename = decoded_filename[0][0].decode(encoding)
+                                except:
+                                    filename = decoded_filename[0][0].decode('utf-8', errors='ignore')
+                            else:
+                                filename = decoded_filename[0][0]
                         
                         # Clean filename
                         filename = filename.strip().strip('"\'')
@@ -305,12 +305,12 @@ class ClaudeEmailProcessor:
                 })
             else:
                 # Regular text content
-            try:
-                body_content = email_message.get_payload(decode=True)
-                if body_content:
-                    body = body_content.decode('utf-8')
-            except:
-                body = str(email_message.get_payload())
+                try:
+                    body_content = email_message.get_payload(decode=True)
+                    if body_content:
+                        body = body_content.decode('utf-8')
+                except:
+                    body = str(email_message.get_payload())
         
         # Log attachment detection results
         if has_attachments:

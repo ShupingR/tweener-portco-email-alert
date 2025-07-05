@@ -1,57 +1,121 @@
-# Tweener Fund Portfolio Email Tracking System
+# 🔐 Tweener Insights Dashboard
 
-A comprehensive, AI-powered system for tracking portfolio company email updates, extracting financial metrics, and managing communications with automated alerts.
+A comprehensive portfolio intelligence dashboard for Tweener Fund with secure authentication, financial metrics tracking, and AI-powered portfolio analysis.
 
-## 🎯 **Overview**
-
-This system monitors email updates from **151 portfolio companies**, uses **Claude AI** to analyze content and extract financial metrics, and provides automated tracking with optional alert functionality. The system focuses on **data collection and analysis** while maintaining the capability for automated reminders.
-
-### **Key Features**
-- 🤖 **AI-Powered Analysis**: Claude Sonnet 4 identifies company updates and extracts financial metrics
-- 📊 **Financial Metrics Extraction**: ARR, MRR, cash balance, runway, growth rates, and more
-- 📎 **Attachment Processing**: Downloads and organizes financial documents by company
-- 🏢 **Portfolio Tracking**: Distinguishes between portfolio and non-portfolio companies
-- 🚨 **Alert System**: Configurable reminders for missing updates (currently paused)
-- 📈 **Historical Tracking**: Complete audit trail of all communications
-
-## 🏗️ **System Architecture**
+## 📁 Project Structure
 
 ```
-📁 pipeline/              # Core data processing pipeline
-├── email_collector.py    # Main daily collection script
-├── email_processor.py    # Claude AI email analysis
-├── financial_extractor.py # Financial metrics extraction
-└── config.py             # Pipeline configuration
-
-📁 database/              # Data persistence layer
-├── models.py             # Core database models
-├── financial_models.py   # Financial metrics models
-├── connection.py         # Database connection management
-└── migrations/           # Database schema updates
-
-📁 integrations/          # External service clients
-├── gmail_client.py       # Gmail IMAP/SMTP functionality
-└── claude_client.py      # Anthropic Claude AI client
-
-📁 alerts/                # Alert system (configurable)
-└── alert_manager.py      # Alert logic and email sending
-
-📁 utils/                 # Utility functions
-├── financial_formatter.py # Financial data parsing/formatting
-└── data_cleaner.py       # Data deduplication utilities
-
-📁 setup/                 # One-time setup scripts
-├── gmail_oauth.py        # Gmail OAuth authentication
-└── import_initial_data.py # Initial data import from CSV
+email-alert/
+├── auth/                    # Authentication system
+│   ├── __init__.py
+│   ├── auth_config.py      # Authentication configuration
+│   ├── auth_utils.py       # Session management utilities
+│   ├── login_page.py       # Login interface component
+│   ├── manage_users.py     # User management CLI tool
+│   ├── setup_auth.py       # Interactive setup script
+│   └── users.json          # User credentials (hashed)
+├── dashboard/              # Main dashboard application
+│   ├── streamlit_app.py    # Main Streamlit entry point
+│   ├── Tweener_Insights.py # Main dashboard functionality
+│   ├── pages/              # Dashboard pages
+│   └── design/             # UI assets and styling
+├── deployment/             # Deployment configurations
+│   ├── app.yaml           # Google App Engine config
+│   ├── Dockerfile         # Docker configuration
+│   ├── cloudbuild.yaml    # Cloud Build config
+│   └── *.sh              # Deployment scripts
+├── docs/                  # Documentation
+│   ├── README.md         # Main documentation
+│   ├── SECURITY_GUIDE.md # Security documentation
+│   ├── DEPLOYMENT_GUIDE.md # Deployment guide
+│   └── *.md              # Other documentation
+├── scripts/               # Utility scripts
+│   ├── refresh_dashboard.py
+│   └── test_logo.py
+├── database/              # Database models and connections
+├── pipeline/              # Email processing pipeline
+├── integrations/          # External service integrations
+├── utils/                 # Utility functions
+├── alerts/                # Alert system
+├── setup/                 # Initial setup scripts
+└── requirements.txt       # Python dependencies
 ```
 
-## 🚀 **Quick Start**
+## 🚀 Quick Start
 
-### **1. Installation**
+### 1. Setup Authentication
 ```bash
-# Clone the repository
+# Interactive setup (recommended)
+python auth/setup_auth.py
+
+# Or manual setup
+python auth/manage_users.py add admin tweenerfund
+```
+
+**Quick Authentication Setup:**
+- **Default Users:** admin, scot, robbie, nikita, shuping, link, derek
+- **Default Password:** `tweenerfund` (change immediately!)
+- **User Management:** `python auth/manage_users.py list/add/remove/change`
+- **Session Timeout:** 8 hours
+- **Security:** SHA-256 password hashing, secure session tokens
+
+### 2. Start Dashboard
+```bash
+streamlit run dashboard/streamlit_app.py --server.port 8501
+```
+
+### 3. Access Dashboard
+- **URL:** http://localhost:8501
+- **Login:** Use credentials created in step 1
+
+## 🔐 Authentication
+
+### Default Users
+- **admin** / `tweenerfund`
+- **scot** / `tweenerfund`
+- **robbie** / `tweenerfund`
+- **nikita** / `tweenerfund`
+- **shuping** / `tweenerfund`
+- **link** / `tweenerfund`
+- **derek** / `tweenerfund`
+
+### User Management
+```bash
+# List all users
+python auth/manage_users.py list
+
+# Add new user
+python auth/manage_users.py add username password
+
+# Remove user
+python auth/manage_users.py remove username
+
+# Change password
+python auth/manage_users.py change username new_password
+```
+
+## 📊 Features
+
+- **🔐 Secure Authentication** - Session-based login with password hashing
+- **📈 Financial Metrics** - ARR, MRR, growth rates, cash balances
+- **🤖 AI Portfolio Assistant** - Natural language queries about portfolio data
+- **📧 Email Integration** - Automatic email processing and data extraction
+- **📊 Interactive Dashboards** - Real-time portfolio visualization
+- **🔔 Alert System** - Automated notifications for important metrics
+- **☁️ Cloud Deployment** - Ready for Google Cloud Platform deployment
+
+## 🛠️ Development
+
+### Prerequisites
+- Python 3.8+
+- SQLite (or PostgreSQL for production)
+- Gmail API credentials (for email integration)
+
+### Installation
+```bash
+# Clone repository
 git clone <repository-url>
-cd tweener-portco-email-alert
+cd email-alert
 
 # Create virtual environment
 python -m venv .venv
@@ -59,264 +123,123 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
+
+# Setup environment variables
+cp env.example .env
+# Edit .env with your credentials
 ```
 
-### **2. Environment Setup**
+### Environment Variables
 ```bash
-# Copy environment template
-cp env.example .env
+# Authentication
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=your_secure_password
 
-# Edit .env with your credentials
-# Required:
-GMAIL_USERNAME=update@tweenerfund.com
-GMAIL_PASSWORD=your_app_specific_password
+# Gmail Integration
+GMAIL_USERNAME=your_email@gmail.com
+GMAIL_PASSWORD=your_app_password
+
+# Database
+DATABASE_URL=sqlite:///tracker.db
+
+# API Keys
 ANTHROPIC_API_KEY=your_claude_api_key
 ```
 
-### **3. Database Setup**
+## 📚 Documentation
+
+- **[Security Guide](docs/SECURITY_GUIDE.md)** - Authentication and security best practices
+- **[Deployment Guide](docs/DEPLOYMENT_GUIDE.md)** - Cloud deployment instructions
+- **[Dashboard Guide](docs/DASHBOARD_README.md)** - Dashboard usage and features
+- **[Financial Metrics](docs/FINANCIAL_METRICS_README.md)** - Financial data processing
+
+## 🔧 Scripts
+
+### Dashboard Management
 ```bash
-# Import initial portfolio companies and contacts
-python setup/import_initial_data.py
+# Refresh dashboard data
+python scripts/refresh_dashboard.py
 
-# Set up financial metrics tables
-python database/migrations/setup_financial_metrics.py
+# Test logo display
+python scripts/test_logo.py
 ```
 
-### **4. Gmail Authentication**
+### Deployment
 ```bash
-# Set up Gmail OAuth (one-time setup)
-python setup/gmail_oauth.py
-# Follow the browser prompts to authenticate with update@tweenerfund.com
+# Quick deploy to Google Cloud
+bash deployment/quick-deploy.sh
+
+# Simple deploy (no Docker)
+bash deployment/simple-deploy.sh
 ```
 
-### **5. Daily Email Collection**
+## 🏗️ Architecture
+
+### Core Components
+- **Authentication System** - Secure user management and session handling
+- **Dashboard Engine** - Streamlit-based interactive interface
+- **Data Pipeline** - Email processing and financial metrics extraction
+- **Database Layer** - SQLAlchemy ORM with SQLite/PostgreSQL
+- **AI Integration** - Claude API for natural language processing
+- **Alert System** - Automated monitoring and notifications
+
+### Data Flow
+1. **Email Collection** → Gmail API integration
+2. **Data Processing** → Financial metrics extraction
+3. **Database Storage** → SQLAlchemy ORM
+4. **Dashboard Display** → Streamlit interface
+5. **User Interaction** → AI-powered portfolio assistant
+
+## 🔒 Security Features
+
+- **Password Hashing** - SHA-256 with salt
+- **Session Management** - Secure tokens with timeout
+- **Environment Variables** - Secure credential storage
+- **HTTPS Support** - Production-ready SSL configuration
+- **Access Control** - User-based permissions
+
+## 🚀 Deployment
+
+### Local Development
 ```bash
-# Test run (safe - no database changes)
-./collect_emails.sh --dry-run
-
-# Collect emails from last 7 days
-./collect_emails.sh
-
-# Collect specific time range
-./collect_emails.sh --days=3
+streamlit run dashboard/streamlit_app.py --server.port 8501
 ```
 
-## 📊 **Current System Status**
-
-### **Database Contents**
-- **Portfolio Companies**: 151 companies actively tracked
-- **Non-Portfolio Companies**: Companies monitored but not alerted
-- **Contacts**: 138 founder/CEO contacts with email addresses
-- **Email Updates**: All processed emails with full content
-- **Financial Metrics**: 34+ extracted financial records from 19+ companies
-- **Attachments**: Downloaded and organized by company
-
-### **AI Analysis Capabilities**
-- **Company Identification**: Automatically identifies which company an email is about
-- **Portfolio Classification**: Distinguishes portfolio vs non-portfolio companies
-- **Financial Extraction**: Extracts 25+ financial metrics including:
-  - Revenue: MRR, ARR, QRR, total/gross/net revenue
-  - Growth: MRR/ARR growth, YoY/MoM growth rates
-  - Financial Health: Cash balance, burn rate, runway months
-  - Business Metrics: Customer count, churn rate, team size
-  - Profitability: Gross margin, EBITDA, net income
-
-## 🔧 **Daily Usage**
-
-### **Command Options**
+### Google Cloud Platform
 ```bash
-# Basic collection
-./collect_emails.sh                     # Last 7 days (default)
-./collect_emails.sh --days=1            # Yesterday only
-./collect_emails.sh --days=30           # Last month
+# Quick deployment
+bash deployment/quick-deploy.sh
 
-# Safe testing
-./collect_emails.sh --dry-run           # Test without saving
-./collect_emails.sh --dry-run --days=1  # Test yesterday only
-
-# Information
-./collect_emails.sh --stats             # Show database statistics
+# Manual deployment
+gcloud app deploy deployment/app.yaml
 ```
 
-### **Python Direct Usage**
+### Docker
 ```bash
-# All shell script options work with Python directly
-python pipeline/email_collector.py --days=7
-python pipeline/email_collector.py --dry-run
-python pipeline/email_collector.py --stats
+# Build and run
+docker build -f deployment/Dockerfile -t tweener-dashboard .
+docker run -p 8501:8501 tweener-dashboard
 ```
 
-### **Sample Output**
-```
-📧 Tweener Fund Daily Email Collector
-==================================================
-📧 Email: update@tweenerfund.com
-🤖 Claude API: ✅ Connected
+## 🤝 Contributing
 
-🔍 Collecting emails from last 7 days...
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
-📊 Changes Made:
-   New Companies: 0
-   New Emails: 4
-   New Attachments: 3
+## 📄 License
 
-📈 Financial Metrics Extracted:
-   New Records: 2
-   Companies Updated: 2
+This project is proprietary to Tweener Fund.
 
-✅ EMAIL COLLECTION COMPLETED
-```
+## 🆘 Support
 
-## 🚨 **Alert System** (Optional)
-
-The alert system can send automated reminders when portfolio companies haven't provided updates:
-
-### **Alert Thresholds**
-- **31 days**: First reminder to founder/CEO
-- **62 days**: Second reminder to founder/CEO
-- **93 days**: Escalation to General Partners
-
-### **Team Configuration**
-- **GPs**: Scot Wingo, Robbie Allen
-- **Partner**: Nikita Ramaswamy  
-- **EIR**: Shuping Dluge
-
-### **Enable Alerts** (Currently Paused)
-```bash
-# Check which companies need alerts (dry-run)
-python alerts/alert_manager.py --check --dry-run
-
-# Send actual alerts (when ready)
-python alerts/alert_manager.py --send
-```
-
-## 📁 **File Organization**
-
-### **Data Storage**
-- **Database**: `tracker.db` (SQLite, excluded from git)
-- **Attachments**: `attachments/{company_id}/` (organized by company)
-- **Logs**: Comprehensive logging of all operations
-
-### **Configuration Files**
-- **`.env`**: Environment variables (excluded from git)
-- **`env.example`**: Template for environment setup
-- **`requirements.txt`**: Python dependencies
-- **`collect_emails.sh`**: Main execution script
-
-## 🔒 **Security & Privacy**
-
-### **Protected Data**
-- Email credentials and API keys (`.env`)
-- Database with company information (`tracker.db`)
-- Downloaded attachments (`attachments/`)
-- OAuth tokens (`token.json`)
-
-### **Git Exclusions**
-```gitignore
-.env
-*.db
-*.sqlite*
-attachments/
-token.json
-credentials.json
-financial_reports/
-link_data/
-```
-
-## 🛠️ **Technical Stack**
-
-- **Language**: Python 3.12+
-- **Database**: SQLite (local) / PostgreSQL (production ready)
-- **ORM**: SQLAlchemy with relationship mapping
-- **AI**: Anthropic Claude Sonnet 4
-- **Email**: Gmail IMAP/SMTP with OAuth2
-- **Storage**: Local filesystem (cloud-ready)
-
-## 📈 **Advanced Features**
-
-### **Financial Metrics Dashboard**
-```bash
-# Generate financial reports
-python utils/financial_formatter.py
-
-# View portfolio metrics
-python -c "
-from database.connection import SessionLocal
-from database.financial_models import FinancialMetrics
-session = SessionLocal()
-metrics = session.query(FinancialMetrics).count()
-print(f'Total financial records: {metrics}')
-"
-```
-
-### **Data Export**
-```bash
-# Export company data
-python utils/data_cleaner.py --export
-
-# Database queries
-sqlite3 tracker.db "SELECT name, last_update_date FROM companies WHERE is_tweener_portfolio = 1;"
-```
-
-## 🔄 **Automation**
-
-### **Cron Setup** (Optional)
-```bash
-# Edit crontab
-crontab -e
-
-# Add daily collection at 9 AM
-0 9 * * * cd /path/to/email-alert && ./collect_emails.sh >> logs/collection.log 2>&1
-```
-
-### **Background Processing**
-The system is designed for daily batch processing but can be configured for real-time monitoring.
-
-## 🐛 **Troubleshooting**
-
-### **Common Issues**
-```bash
-# Test Gmail connection
-python integrations/gmail_client.py
-
-# Test Claude API
-python integrations/claude_client.py
-
-# Check database integrity
-python database/connection.py
-
-# Verify file permissions
-ls -la .env attachments/
-```
-
-### **Database Issues**
-```bash
-# Reset database (if needed)
-rm tracker.db
-python setup/import_initial_data.py
-python database/migrations/setup_financial_metrics.py
-```
-
-## 📞 **Support & Development**
-
-### **System Status**
-- ✅ **Production Ready**: Core email collection and analysis
-- ✅ **AI Integration**: Claude Sonnet 4 analysis working
-- ✅ **Financial Extraction**: Comprehensive metrics extraction
-- ✅ **Attachment Handling**: Download and organization
-- ⏸️ **Alert System**: Available but currently paused
-- 🔄 **Continuous Improvement**: Regular updates and enhancements
-
-### **Next Steps**
-1. **Production Deployment**: Enable alert system when ready
-2. **Dashboard Development**: Web interface for monitoring
-3. **Advanced Analytics**: Trend analysis and reporting
-4. **Integration Expansion**: Slack, Teams, or other platforms
+For technical support or questions:
+- Check the documentation in `docs/`
+- Review the security guide for authentication issues
+- Contact the development team
 
 ---
 
-**Status**: ✅ **Production Ready for Data Collection**  
-**Last Updated**: June 2025  
-**Maintained By**: Tweener Fund Team
-
-For questions or issues, check the troubleshooting section above or review the individual module documentation in each directory's `__init__.py` files. 
+**Tweener Insights Dashboard** - Portfolio Intelligence with AI-Powered Analysis 

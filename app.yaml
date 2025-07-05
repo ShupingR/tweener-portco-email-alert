@@ -1,0 +1,24 @@
+runtime: python311
+service: default
+
+env_variables:
+  PYTHONPATH: /app
+  STREAMLIT_SERVER_PORT: 8080
+  STREAMLIT_SERVER_ADDRESS: 0.0.0.0
+
+automatic_scaling:
+  target_cpu_utilization: 0.65
+  min_instances: 0
+  max_instances: 3
+
+resources:
+  cpu: 1
+  memory_gb: 1
+  disk_size_gb: 10
+
+handlers:
+  - url: /.*
+    script: auto
+    secure: always
+
+entrypoint: streamlit run dashboard/streamlit_app.py --server.port=$PORT --server.address=0.0.0.0 --server.headless=true
