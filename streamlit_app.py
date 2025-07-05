@@ -15,16 +15,8 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 # Import authentication
 from auth.login_page import require_authentication
 
-# Import the main dashboard functionality
-from dashboard.Tweener_Insights import main
+# Require authentication before showing the dashboard
+require_authentication()
 
-def app():
-    """Main app function with authentication"""
-    # Require authentication before showing the dashboard
-    require_authentication()
-    
-    # Run the main dashboard
-    main()
-
-if __name__ == "__main__":
-    app() 
+# Run the dashboard code directly (not as an import)
+exec(open('dashboard/Tweener_Insights.py').read()) 
