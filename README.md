@@ -1,157 +1,245 @@
-# Tweener Fund Email Tracker
+# 🔐 Tweener Insights Dashboard
 
-A comprehensive system to track email updates from portfolio companies and send automated reminders when updates are missing.
+A comprehensive portfolio intelligence dashboard for Tweener Fund with secure authentication, financial metrics tracking, and AI-powered portfolio analysis.
 
-## 🎯 Purpose
+## 📁 Project Structure
 
-Track all email updates from 151 portfolio companies, store emails with attachments, and automatically remind founders when updates are overdue (1 month + 1 day, 2 months + 2 days) with escalation to general partners after 3 months + 3 days.
-
-## 📊 Current Status
-
-✅ **Completed:**
-- Database models and schema
-- Data import from CSV files (151 companies, 138 contacts)
-- Gmail API integration setup
-- Email ingestion framework
-- Deduplication system
-- Test framework
-
-🔄 **Ready for Setup:**
-- Gmail API authentication for `update@tweenerfund.com`
-- Real email ingestion
-- Alert/reminder system
-- Scheduling automation
-
-## 🗂️ Database Structure
-
-- **Companies**: 151 portfolio companies with investment details
-- **Contacts**: 138 founder/CEO contacts with email addresses
-- **EmailUpdates**: Stores all incoming emails with body, subject, date
-- **Attachments**: Tracks email attachments (stored locally)
-- **Alerts**: Manages reminder/escalation system
-
-## 📁 Project Files
-
-### Core System
-- `models.py` - Database models (SQLAlchemy)
-- `db.py` - Database connection and setup
-- `import_data.py` - Import companies and contacts from CSV
-- `deduplicate.py` - Remove duplicate companies
-
-### Gmail Integration
-- `setup_gmail.py` - Gmail API authentication setup
-- `gmail_ingest.py` - Email ingestion from Gmail
-- `GMAIL_SETUP_GUIDE.md` - Step-by-step setup instructions
-
-### Testing & Utilities
-- `test_system.py` - Comprehensive system testing
-- `requirements.txt` - Python dependencies
-
-### Data Sources
-- `scot_data/Triangle Tweener Fund_Lifetime_Investments.csv` - Portfolio companies
-- `scot_data/ContactExport-export-c64323f753.csv` - Contact information
+```
+email-alert/
+├── auth/                    # Authentication system
+│   ├── __init__.py
+│   ├── auth_config.py      # Authentication configuration
+│   ├── auth_utils.py       # Session management utilities
+│   ├── login_page.py       # Login interface component
+│   ├── manage_users.py     # User management CLI tool
+│   ├── setup_auth.py       # Interactive setup script
+│   └── users.json          # User credentials (hashed)
+├── dashboard/              # Main dashboard application
+│   ├── streamlit_app.py    # Main Streamlit entry point
+│   ├── Tweener_Insights.py # Main dashboard functionality
+│   ├── pages/              # Dashboard pages
+│   └── design/             # UI assets and styling
+├── deployment/             # Deployment configurations
+│   ├── app.yaml           # Google App Engine config
+│   ├── Dockerfile         # Docker configuration
+│   ├── cloudbuild.yaml    # Cloud Build config
+│   └── *.sh              # Deployment scripts
+├── docs/                  # Documentation
+│   ├── README.md         # Main documentation
+│   ├── SECURITY_GUIDE.md # Security documentation
+│   ├── DEPLOYMENT_GUIDE.md # Deployment guide
+│   └── *.md              # Other documentation
+├── scripts/               # Utility scripts
+│   ├── refresh_dashboard.py
+│   └── test_logo.py
+├── database/              # Database models and connections
+├── pipeline/              # Email processing pipeline
+├── integrations/          # External service integrations
+├── utils/                 # Utility functions
+├── alerts/                # Alert system
+├── setup/                 # Initial setup scripts
+└── requirements.txt       # Python dependencies
+```
 
 ## 🚀 Quick Start
 
-### 1. Install Dependencies
+### 1. Setup Authentication
 ```bash
+# Interactive setup (recommended)
+python auth/setup_auth.py
+
+# Or manual setup
+python auth/manage_users.py add admin tweenerfund
+```
+
+**Quick Authentication Setup:**
+- **Default Users:** admin, scot, robbie, nikita, shuping, link, derek
+- **Default Password:** `tweenerfund` (change immediately!)
+- **User Management:** `python auth/manage_users.py list/add/remove/change`
+- **Session Timeout:** 8 hours
+- **Security:** SHA-256 password hashing, secure session tokens
+
+### 2. Start Dashboard
+```bash
+streamlit run dashboard/streamlit_app.py --server.port 8501
+```
+
+### 3. Access Dashboard
+- **URL:** http://localhost:8501
+- **Login:** Use credentials created in step 1
+
+## 🔐 Authentication
+
+### Default Users
+- **admin** / `tweenerfund`
+- **scot** / `tweenerfund`
+- **robbie** / `tweenerfund`
+- **nikita** / `tweenerfund`
+- **shuping** / `tweenerfund`
+- **link** / `tweenerfund`
+- **derek** / `tweenerfund`
+
+### User Management
+```bash
+# List all users
+python auth/manage_users.py list
+
+# Add new user
+python auth/manage_users.py add username password
+
+# Remove user
+python auth/manage_users.py remove username
+
+# Change password
+python auth/manage_users.py change username new_password
+```
+
+## 📊 Features
+
+- **🔐 Secure Authentication** - Session-based login with password hashing
+- **📈 Financial Metrics** - ARR, MRR, growth rates, cash balances
+- **🤖 AI Portfolio Assistant** - Natural language queries about portfolio data
+- **📧 Email Integration** - Automatic email processing and data extraction
+- **📊 Interactive Dashboards** - Real-time portfolio visualization
+- **🔔 Alert System** - Automated notifications for important metrics
+- **☁️ Cloud Deployment** - Ready for Google Cloud Platform deployment
+
+## 🛠️ Development
+
+### Prerequisites
+- Python 3.8+
+- SQLite (or PostgreSQL for production)
+- Gmail API credentials (for email integration)
+
+### Installation
+```bash
+# Clone repository
+git clone <repository-url>
+cd email-alert
+
+# Create virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Setup environment variables
+cp env.example .env
+# Edit .env with your credentials
 ```
 
-### 2. Initialize Database and Import Data
+### Environment Variables
 ```bash
-python import_data.py
+# Authentication
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=your_secure_password
+
+# Gmail Integration
+GMAIL_USERNAME=your_email@gmail.com
+GMAIL_PASSWORD=your_app_password
+
+# Database
+DATABASE_URL=sqlite:///tracker.db
+
+# API Keys
+ANTHROPIC_API_KEY=your_claude_api_key
 ```
 
-### 3. Set Up Gmail API (for update@tweenerfund.com)
-Follow the detailed guide in `GMAIL_SETUP_GUIDE.md`:
+## 📚 Documentation
+
+- **[Security Guide](docs/SECURITY_GUIDE.md)** - Authentication and security best practices
+- **[Deployment Guide](docs/DEPLOYMENT_GUIDE.md)** - Cloud deployment instructions
+- **[Dashboard Guide](docs/DASHBOARD_README.md)** - Dashboard usage and features
+- **[Financial Metrics](docs/FINANCIAL_METRICS_README.md)** - Financial data processing
+
+## 🔧 Scripts
+
+### Dashboard Management
 ```bash
-python setup_gmail.py
+# Refresh dashboard data
+python scripts/refresh_dashboard.py
+
+# Test logo display
+python scripts/test_logo.py
 ```
 
-### 4. Run Email Ingestion
+### Deployment
 ```bash
-python gmail_ingest.py
+# Quick deploy to Google Cloud
+bash deployment/quick-deploy.sh
+
+# Simple deploy (no Docker)
+bash deployment/simple-deploy.sh
 ```
 
-### 5. Test the System
+## 🏗️ Architecture
+
+### Core Components
+- **Authentication System** - Secure user management and session handling
+- **Dashboard Engine** - Streamlit-based interactive interface
+- **Data Pipeline** - Email processing and financial metrics extraction
+- **Database Layer** - SQLAlchemy ORM with SQLite/PostgreSQL
+- **AI Integration** - Claude API for natural language processing
+- **Alert System** - Automated monitoring and notifications
+
+### Data Flow
+1. **Email Collection** → Gmail API integration
+2. **Data Processing** → Financial metrics extraction
+3. **Database Storage** → SQLAlchemy ORM
+4. **Dashboard Display** → Streamlit interface
+5. **User Interaction** → AI-powered portfolio assistant
+
+## 🔒 Security Features
+
+- **Password Hashing** - SHA-256 with salt
+- **Session Management** - Secure tokens with timeout
+- **Environment Variables** - Secure credential storage
+- **HTTPS Support** - Production-ready SSL configuration
+- **Access Control** - User-based permissions
+
+## 🚀 Deployment
+
+### Local Development
 ```bash
-python test_system.py
+streamlit run dashboard/streamlit_app.py --server.port 8501
 ```
 
-## 📧 Gmail Setup Summary
+### Google Cloud Platform
+```bash
+# Quick deployment
+bash deployment/quick-deploy.sh
 
-The system connects to `update@tweenerfund.com` to:
-- Search for emails from all 138 portfolio company contacts
-- Extract email body, subject, date, and attachments
-- Store everything in the database for tracking
+# Manual deployment
+gcloud app deploy deployment/app.yaml
+```
 
-**Required:** Google Cloud Console setup with Gmail API enabled and OAuth credentials.
+### Docker
+```bash
+# Build and run
+docker build -f deployment/Dockerfile -t tweener-dashboard .
+docker run -p 8501:8501 tweener-dashboard
+```
 
-## 🔔 Alert System (Next Phase)
+## 🤝 Contributing
 
-The reminder system will:
-- **1 Month + 1 Day**: Email reminder to founder
-- **2 Months + 2 Days**: Second reminder to founder  
-- **3 Months + 3 Days**: Escalation email to general partners
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
-## 📈 Current Data
+## 📄 License
 
-- **151 Portfolio Companies** (deduplicated from 412)
-- **138 Contacts** with email addresses
-- **Sample Companies**: Wrangle, Trio Labs, Wander Maps, ArenaCX, XComP Analytics
-- **Ready for Email Tracking**: All contacts loaded and mapped to companies
+This project is proprietary to Tweener Fund.
 
-## 🛠️ Technical Stack
+## 🆘 Support
 
-- **Database**: SQLite (local) / PostgreSQL (production)
-- **Framework**: SQLAlchemy ORM
-- **Email**: Gmail API with OAuth2
-- **Language**: Python 3.12
-- **Storage**: Local file system for attachments
-
-## 📋 Next Steps
-
-1. **Complete Gmail Setup**
-   - Follow `GMAIL_SETUP_GUIDE.md`
-   - Authenticate with `update@tweenerfund.com`
-   - Test email ingestion
-
-2. **Build Alert System**
-   - Create reminder email templates
-   - Implement scheduling logic
-   - Set up email sending functionality
-
-3. **Add Scheduling**
-   - Daily email checking
-   - Automated reminder sending
-   - Background job processing
-
-4. **Create Dashboard**
-   - Web interface for monitoring
-   - Company update status
-   - Alert management
-
-5. **Deploy to Google Cloud**
-   - Cloud SQL database
-   - Cloud Storage for attachments
-   - Cloud Functions for scheduling
-
-## 🔒 Security Notes
-
-- Keep `credentials.json` and `token.json` secure
-- Never commit authentication files to version control
-- Use environment variables for production deployment
-- Consider encrypted storage for sensitive data
-
-## 📞 Support
-
-For issues or questions:
-1. Check the troubleshooting sections in the guides
-2. Verify all setup steps were completed
-3. Test with the provided test scripts
-4. Check Google Cloud Console for API limits/quotas
+For technical support or questions:
+- Check the documentation in `docs/`
+- Review the security guide for authentication issues
+- Contact the development team
 
 ---
 
-**Status**: Local prototype ready for Gmail API setup and testing. 
+**Tweener Insights Dashboard** - Portfolio Intelligence with AI-Powered Analysis 
