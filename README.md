@@ -19,11 +19,8 @@ email-alert/
 │   ├── Tweener_Insights.py # Main dashboard functionality
 │   ├── pages/              # Dashboard pages
 │   └── design/             # UI assets and styling
-├── deployment/             # Deployment configurations
-│   ├── app.yaml           # Google App Engine config
-│   ├── Dockerfile         # Docker configuration
-│   ├── cloudbuild.yaml    # Cloud Build config
-│   └── *.sh              # Deployment scripts
+├── scripts/deployment/     # Deployment configurations
+│   └── deploy.sh          # Unified deployment script
 ├── docs/                  # Documentation
 │   ├── README.md         # Main documentation
 │   ├── SECURITY_GUIDE.md # Security documentation
@@ -102,7 +99,7 @@ python auth/manage_users.py change username new_password
 - **📧 Email Integration** - Automatic email processing and data extraction
 - **📊 Interactive Dashboards** - Real-time portfolio visualization
 - **🔔 Alert System** - Automated notifications for important metrics
-- **☁️ Cloud Deployment** - Ready for Google Cloud Platform deployment
+- **☁️ Cloud Deployment** - Ready for Streamlit Community Cloud deployment
 
 ## 🛠️ Development
 
@@ -166,11 +163,11 @@ python scripts/test_logo.py
 
 ### Deployment
 ```bash
-# Quick deploy to Google Cloud
-bash deployment/quick-deploy.sh
+# Deploy to Streamlit Community Cloud
+# Follow instructions in STREAMLIT_CLOUD_DEPLOYMENT.md
 
-# Simple deploy (no Docker)
-bash deployment/simple-deploy.sh
+# Local deployment
+bash scripts/deployment/deploy.sh --local
 ```
 
 ## 🏗️ Architecture
@@ -205,13 +202,10 @@ bash deployment/simple-deploy.sh
 streamlit run dashboard/streamlit_app.py --server.port 8501
 ```
 
-### Google Cloud Platform
+### Streamlit Community Cloud
 ```bash
-# Quick deployment
-bash deployment/quick-deploy.sh
-
-# Manual deployment
-gcloud app deploy deployment/app.yaml
+# Deploy to Streamlit Community Cloud
+# Follow instructions in STREAMLIT_CLOUD_DEPLOYMENT.md
 ```
 
 ### Docker

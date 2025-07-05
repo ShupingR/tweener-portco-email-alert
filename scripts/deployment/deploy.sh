@@ -10,14 +10,13 @@ Usage:
 
 Options:
     --local          Deploy locally with Docker
-    --cloud-run      Deploy to Google Cloud Run
-    --heroku         Deploy to Heroku
+    --streamlit-cloud Deploy to Streamlit Community Cloud
     --test           Test deployment locally
     --help           Show this help message
 
 Examples:
     ./scripts/deployment/deploy.sh --local
-    ./scripts/deployment/deploy.sh --cloud-run
+    ./scripts/deployment/deploy.sh --streamlit-cloud
 """
 
 set -e
@@ -31,8 +30,6 @@ NC='\033[0m' # No Color
 
 # Configuration
 PROJECT_NAME="tweener-dashboard"
-REGION="us-central1"
-SERVICE_NAME="tweener-fund-dashboard"
 
 # Functions
 print_header() {
@@ -61,10 +58,6 @@ check_dependencies() {
         exit 1
     fi
     
-    if ! command -v gcloud &> /dev/null; then
-        print_warning "Google Cloud CLI not found (needed for cloud deployment)"
-    fi
-    
     print_success "Dependencies check complete"
 }
 
@@ -88,48 +81,25 @@ deploy_local() {
     echo "Stop with: docker stop $PROJECT_NAME"
 }
 
-deploy_cloud_run() {
-    print_header "Deploying to Google Cloud Run"
+deploy_streamlit_cloud() {
+    print_header "Deploying to Streamlit Community Cloud"
     
-    if ! command -v gcloud &> /dev/null; then
-        print_error "Google Cloud CLI required for cloud deployment"
-        exit 1
-    fi
+    print_warning "This will guide you through Streamlit Cloud deployment"
+    echo ""
+    echo "Steps:"
+    echo "1. Go to https://share.streamlit.io"
+    echo "2. Sign in with GitHub"
+    echo "3. Click 'New app'"
+    echo "4. Configure:"
+    echo "   - Repository: ShupingR/tweener-portco-email-alert"
+    echo "   - Branch: main"
+    echo "   - Main file path: streamlit_app.py"
+    echo "5. Add secrets in Settings → Secrets"
+    echo "6. Deploy!"
+    echo ""
+    echo "For detailed instructions, see STREAMLIT_CLOUD_DEPLOYMENT.md"
     
-    # Build and push to Container Registry
-    print_header "Building and Pushing Image"
-    gcloud builds submit --tag gcr.io/$PROJECT_NAME/$SERVICE_NAME .
-    
-    # Deploy to Cloud Run
-    print_header "Deploying to Cloud Run"
-    gcloud run deploy $SERVICE_NAME \
-        --image gcr.io/$PROJECT_NAME/$SERVICE_NAME \
-        --platform managed \
-        --region $REGION \
-        --allow-unauthenticated \
-        --port 8501
-    
-    print_success "Dashboard deployed to Cloud Run!"
-}
-
-deploy_heroku() {
-    print_header "Deploying to Heroku"
-    
-    if ! command -v heroku &> /dev/null; then
-        print_error "Heroku CLI required for Heroku deployment"
-        exit 1
-    fi
-    
-    # Create Heroku app if it doesn't exist
-    if ! heroku apps:info $PROJECT_NAME &> /dev/null; then
-        heroku create $PROJECT_NAME
-    fi
-    
-    # Deploy
-    git push heroku main
-    
-    print_success "Dashboard deployed to Heroku!"
-    echo "Access at: https://$PROJECT_NAME.herokuapp.com"
+    print_success "Streamlit Cloud deployment guide displayed"
 }
 
 test_deployment() {
@@ -166,14 +136,13 @@ show_help() {
     echo ""
     echo "Options:"
     echo "  --local          Deploy locally with Docker"
-    echo "  --cloud-run      Deploy to Google Cloud Run"
-    echo "  --heroku         Deploy to Heroku"
+    echo "  --streamlit-cloud Deploy to Streamlit Community Cloud"
     echo "  --test           Test deployment locally"
     echo "  --help           Show this help message"
     echo ""
     echo "Examples:"
     echo "  $0 --local"
-    echo "  $0 --cloud-run"
+    echo "  $0 --streamlit-cloud"
 }
 
 # Main script
@@ -183,13 +152,8 @@ main() {
             check_dependencies
             deploy_local
             ;;
-        --cloud-run)
-            check_dependencies
-            deploy_cloud_run
-            ;;
-        --heroku)
-            check_dependencies
-            deploy_heroku
+        --streamlit-cloud)
+            deploy_streamlit_cloud
             ;;
         --test)
             check_dependencies
@@ -206,4 +170,5 @@ main() {
     esac
 }
 
+# Run main function
 main "$@" 

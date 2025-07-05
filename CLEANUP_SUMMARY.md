@@ -11,7 +11,7 @@
 ### **2. Deployment Script Consolidation (FIXED)**
 - **Archived**: 8 old deployment scripts to `scripts/deployment/archive/`
 - **Created**: Single `scripts/deployment/deploy.sh` with all options
-- **Features**: Local Docker, Cloud Run, Heroku, testing
+- **Features**: Local Docker, Streamlit Cloud, testing
 - **Result**: One script handles all deployment scenarios
 
 ### **3. Database Connection Duplication (FIXED)**
@@ -89,7 +89,7 @@ streamlit run streamlit_app.py
 ./scripts/deployment/deploy.sh --local
 
 # Cloud deployment
-./scripts/deployment/deploy.sh --cloud-run
+./scripts/deployment/deploy.sh --streamlit-cloud
 
 # Test deployment
 ./scripts/deployment/deploy.sh --test
