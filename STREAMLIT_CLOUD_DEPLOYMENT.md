@@ -19,7 +19,7 @@ email-alert/
 │   ├── config.toml          # App configuration
 │   └── secrets.toml         # Secrets (create from example)
 ├── dashboard/               # Dashboard modules
-├── auth/                    # Authentication system
+├── database/                # Database models
 ├── database/                # Database models
 └── pipeline/               # Email processing pipeline
 ```
@@ -32,7 +32,6 @@ email-alert/
 2. Fill in your actual values:
    - Database credentials
    - API keys (Anthropic, Google)
-   - Authentication credentials
 3. **IMPORTANT**: Never commit `secrets.toml` to Git!
 
 ### 2. Push to GitHub
@@ -80,11 +79,9 @@ Streamlit Cloud automatically sets:
    DATABASE_URL = "sqlite:///./email_tracker.db"
    ```
 
-### Authentication
+### Access
 
-The app includes built-in authentication. Default admin credentials:
-- Username: Set in `secrets.toml`
-- Password: Set in `secrets.toml`
+The dashboard is accessible without authentication. Users can directly access the portfolio intelligence features.
 
 ## Troubleshooting
 
@@ -104,7 +101,6 @@ View logs in Streamlit Cloud dashboard:
 
 ## Features
 
-- **Authentication**: Session-based login system
 - **Dashboard**: Portfolio companies overview
 - **Financial Metrics**: Automated extraction and display
 - **Portfolio Assistant**: AI-powered analysis
@@ -112,10 +108,9 @@ View logs in Streamlit Cloud dashboard:
 
 ## Security Notes
 
-1. Use strong passwords in production
-2. Rotate API keys regularly
-3. Use PostgreSQL with SSL in production
-4. Keep secrets.toml out of version control
+1. Rotate API keys regularly
+2. Use PostgreSQL with SSL in production
+3. Keep secrets.toml out of version control
 
 ## Support
 
