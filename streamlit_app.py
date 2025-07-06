@@ -15,5 +15,6 @@ import sys
 # Add the project root to Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-# Execute the dashboard file directly
-exec(open('dashboard/tweener_insights.py').read()) 
+# Use an absolute path to open the dashboard file
+DASHBOARD_PATH = os.path.join(os.path.dirname(__file__), "dashboard", "pages", "tweener_insights.py")
+exec(open(DASHBOARD_PATH).read()) 
