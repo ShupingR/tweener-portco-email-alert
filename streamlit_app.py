@@ -15,9 +15,9 @@ import sys
 # Add the project root to Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-# Import the dashboard module and run the main function
-import dashboard.tweener_insights
+# Import and run the main dashboard
+from dashboard.tweener_insights import main
 
 # Run the main function
 if __name__ == "__main__":
-    dashboard.tweener_insights.main() 
+    main() 
