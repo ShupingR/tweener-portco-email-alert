@@ -15,7 +15,7 @@ import re
 from sqlalchemy import func, text
 
 # Add the project root to Python path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from database.models import Company, EmailUpdate
 from database.financial_models import FinancialMetrics
@@ -333,9 +333,9 @@ class DatabaseChatbot:
         """Provide portfolio overview"""
         try:
             total_companies = self.session.query(Company).filter(Company.is_tweener_portfolio == True).count()
-            companies_with_metrics = self.session.query(FinancialMetrics).join(Company).filter(
+            companies_with_metrics = self.session.query(FinancialMetrics.company_id).join(Company).filter(
                 Company.is_tweener_portfolio == True
-            ).distinct(FinancialMetrics.company_id).count()
+            ).distinct().count()
             recent_updates = self.session.query(FinancialMetrics).join(Company).filter(
                 Company.is_tweener_portfolio == True,
                 FinancialMetrics.extracted_date >= datetime.now() - timedelta(days=30)
