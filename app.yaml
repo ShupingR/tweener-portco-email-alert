@@ -1,0 +1,26 @@
+runtime: python311
+service: default
+
+env_variables:
+  PYTHONPATH: /srv
+  STREAMLIT_SERVER_PORT: 8080
+  STREAMLIT_SERVER_ADDRESS: 0.0.0.0
+
+automatic_scaling:
+  target_cpu_utilization: 0.65
+  min_instances: 0
+  max_instances: 5
+  target_throughput_utilization: 0.6
+
+resources:
+  cpu: 1
+  memory_gb: 2
+  disk_size_gb: 10
+
+handlers:
+  - url: /.*
+    script: auto
+    secure: always
+
+inbound_services:
+  - warmup

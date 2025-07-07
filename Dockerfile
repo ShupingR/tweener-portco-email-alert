@@ -1,4 +1,4 @@
-# Use Python 3.11 slim image
+# Use Python 3.11 slim image for smaller size
 FROM python:3.11-slim
 
 # Set working directory
@@ -20,12 +20,15 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Create necessary directories
-RUN mkdir -p /app/attachments /app/scot_data /app/link_data
+RUN mkdir -p attachments link_data scot_data
 
 # Set environment variables
 ENV PYTHONPATH=/app
 ENV STREAMLIT_SERVER_PORT=8080
 ENV STREAMLIT_SERVER_ADDRESS=0.0.0.0
+ENV STREAMLIT_SERVER_HEADLESS=true
+ENV STREAMLIT_SERVER_ENABLE_CORS=false
+ENV STREAMLIT_SERVER_ENABLE_XSRF_PROTECTION=false
 
 # Expose port
 EXPOSE 8080
