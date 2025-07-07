@@ -41,4 +41,6 @@ timeout: '1200s'
 
 # Logging configuration
 options:
-  logging: CLOUD_LOGGING_ONLY 
+  logging: CLOUD_LOGGING_ONLY
+  
+# Use Cloud Build service account explicitly 
