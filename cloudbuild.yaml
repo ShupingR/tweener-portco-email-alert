@@ -31,6 +31,10 @@ steps:
       - '300'
       - '--set-env-vars'
       - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID'
+      - '--set-secrets'
+      - 'ADMIN_PASSWORD=ADMIN_PASSWORD:latest,ANTHROPIC_API_KEY=ANTHROPIC_API_KEY:latest,DATABASE_URL=DATABASE_URL:latest,GMAIL_PASSWORD=GMAIL_PASSWORD:latest,GMAIL_USERNAME=GMAIL_USERNAME:latest,GP_EMAILS=GP_EMAILS:latest,SESSION_SECRET=SESSION_SECRET:latest,USER_CREDENTIALS=USER_CREDENTIALS:latest'
+      - '--service-account'
+      - 'email-alert-service@$PROJECT_ID.iam.gserviceaccount.com'
 
 # Store images in Artifact Registry
 images:
