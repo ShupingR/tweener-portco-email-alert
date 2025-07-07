@@ -1,5 +1,5 @@
-# Use Python 3.11 slim image for smaller size
-FROM python:3.11-slim
+# Use Python 3.12 slim image
+FROM python:3.12-slim
 
 # Set working directory
 WORKDIR /app
@@ -19,22 +19,15 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
-# Create necessary directories
-RUN mkdir -p attachments link_data scot_data
-
-# Set environment variables
-ENV PYTHONPATH=/app
-ENV STREAMLIT_SERVER_PORT=8080
-ENV STREAMLIT_SERVER_ADDRESS=0.0.0.0
-ENV STREAMLIT_SERVER_HEADLESS=true
-ENV STREAMLIT_SERVER_ENABLE_CORS=false
-ENV STREAMLIT_SERVER_ENABLE_XSRF_PROTECTION=false
+# Create non-root user
+RUN useradd -m -u 1000 streamlit && chown -R streamlit:streamlit /app
+USER streamlit
 
 # Expose port
-EXPOSE 8080
+EXPOSE 8501
 
 # Health check
-HEALTHCHECK CMD curl --fail http://localhost:8080/_stcore/health
+HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
 
 # Run the application
-CMD ["streamlit", "run", "streamlit_app.py", "--server.port=8080", "--server.address=0.0.0.0"] 
+CMD ["streamlit", "run", "streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true"] 
