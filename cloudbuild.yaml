@@ -37,4 +37,8 @@ images:
   - 'gcr.io/$PROJECT_ID/tweener-insights:$COMMIT_SHA'
 
 # Build timeout
-timeout: '1200s' 
+timeout: '1200s'
+
+# Logging configuration
+options:
+  logging: CLOUD_LOGGING_ONLY 
