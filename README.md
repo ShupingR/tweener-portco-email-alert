@@ -2,6 +2,8 @@
 
 A comprehensive portfolio management and financial analysis platform that processes email updates from portfolio companies, extracts financial metrics, and provides AI-powered insights through an interactive dashboard.
 
+<!-- Build trigger: Retry with logging permissions -->
+
 ## 🚀 Quick Start
 
 ### 1. Setup Authentication
