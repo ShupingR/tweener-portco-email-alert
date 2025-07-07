@@ -34,6 +34,14 @@ except ImportError as e:
     st.error(f"Database module import error: {e}")
     DB_AVAILABLE = False
 
+# Import automated email processing
+try:
+    from scripts.automated_email_processor import AutomatedEmailProcessor
+    EMAIL_PROCESSOR_AVAILABLE = True
+except ImportError as e:
+    st.error(f"Email processor module import error: {e}")
+    EMAIL_PROCESSOR_AVAILABLE = False
+
 # Page configuration
 st.set_page_config(
     page_title="Tweener Fund - Portfolio Intelligence",
@@ -84,6 +92,14 @@ def main():
             st.success("✅ Database initialized successfully")
         except Exception as e:
             st.error(f"Database initialization error: {e}")
+    
+    # Check for automated email processing requests
+    if EMAIL_PROCESSOR_AVAILABLE:
+        # Check if this is an API call for email processing
+        if st.experimental_get_query_params().get("action") == ["process_emails"]:
+            st.set_page_config(page_title="Email Processing", layout="wide")
+            run_email_processing()
+            return
     
     # Check if authentication is available
     if not AUTH_AVAILABLE:
@@ -221,6 +237,39 @@ def main():
         Powered by Streamlit & AI • Secure • Real-time
     </div>
     """, unsafe_allow_html=True)
+
+def run_email_processing():
+    """Run automated email processing for Cloud Scheduler"""
+    st.title("🤖 Automated Email Processing")
+    st.markdown("**Processing emails and extracting financial metrics...**")
+    
+    try:
+        # Get parameters from query string
+        params = st.experimental_get_query_params()
+        days = int(params.get("days", ["7"])[0])
+        dry_run = params.get("dry_run", ["false"])[0].lower() == "true"
+        
+        st.info(f"📧 Processing emails from last {days} days")
+        if dry_run:
+            st.warning("🧪 Running in DRY RUN mode - no changes will be made")
+        
+        # Initialize processor
+        with st.spinner("Initializing email processor..."):
+            processor = AutomatedEmailProcessor(dry_run=dry_run)
+        
+        # Run processing
+        with st.spinner("Processing emails and extracting metrics..."):
+            success = processor.run_full_processing(days_back=days)
+        
+        if success:
+            st.success("✅ Email processing completed successfully!")
+            st.balloons()
+        else:
+            st.error("❌ Email processing failed")
+            
+    except Exception as e:
+        st.error(f"❌ Error during email processing: {e}")
+        st.exception(e)
 
 if __name__ == "__main__":
     main() 

@@ -1,0 +1,30 @@
+# Cloud Scheduler Job Configuration
+# This job runs the automated email processor daily
+
+apiVersion: cloudscheduler.googleapis.com/v1
+kind: Job
+metadata:
+  name: tweener-email-processor-daily
+  project: famous-rhythm-465100-p6
+spec:
+  schedule: "0 9 * * *"  # Run daily at 9 AM UTC
+  timeZone: "UTC"
+  httpTarget:
+    uri: "https://tweener-insights-hsgfqtamea-uc.a.run.app/process-emails"
+    httpMethod: "POST"
+    headers:
+      Content-Type: "application/json"
+    body: |
+      {
+        "days": 7,
+        "dry_run": false
+      }
+    oidcToken:
+      serviceAccountEmail: "email-alert-service@famous-rhythm-465100-p6.iam.gserviceaccount.com"
+      audience: "https://tweener-insights-hsgfqtamea-uc.a.run.app"
+  retryConfig:
+    retryCount: 3
+    maxRetryDuration: "600s"
+    minBackoffDuration: "60s"
+    maxBackoffDuration: "300s"
+    maxDoublings: 3 
