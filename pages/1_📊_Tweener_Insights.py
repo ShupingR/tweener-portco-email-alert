@@ -23,6 +23,13 @@ from sqlalchemy import func, text
 # Add the project root to Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# Import authentication first
+try:
+    from user_auth import check_authentication, show_login_page, show_user_info, require_permission
+    AUTH_AVAILABLE = True
+except ImportError:
+    AUTH_AVAILABLE = False
+
 from database.models import Company, EmailUpdate
 from database.financial_models import FinancialMetrics
 from database.connection import SessionLocal
@@ -1129,6 +1136,23 @@ def create_chatbot_ui():
     pass
 
 def main():
+    # Check authentication first
+    if not AUTH_AVAILABLE:
+        st.error("Authentication system not available. Please install required dependencies.")
+        st.info("For local development, install: pip install google-cloud-secret-manager")
+        return
+    
+    # Check authentication
+    if not check_authentication():
+        show_login_page()
+        return
+    
+    # Show user info in sidebar
+    show_user_info()
+    
+    # Check read permission
+    require_permission("read", "You need read access to view the Tweener Insights dashboard.")
+    
     # Simple header
     st.title("Tweener Insights")
     st.markdown("**Generative Portfolio Intelligence for Triangle Tweener Fund**")

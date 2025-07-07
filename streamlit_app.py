@@ -16,6 +16,14 @@ import sys
 # Add the project root to Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+# Import enhanced authentication with error handling
+try:
+    from user_auth import show_login_page, check_authentication, show_user_info, get_current_user, check_permission
+    AUTH_AVAILABLE = True
+except ImportError as e:
+    st.error(f"Authentication module import error: {e}")
+    AUTH_AVAILABLE = False
+
 # Page configuration
 st.set_page_config(
     page_title="Tweener Fund - Portfolio Intelligence",
@@ -59,14 +67,37 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 def main():
+    # Check if authentication is available
+    if not AUTH_AVAILABLE:
+        st.error("Authentication system not available. Please install required dependencies.")
+        st.info("For local development, install: pip install google-cloud-secret-manager")
+        return
+    
+    # Check authentication first
+    if not check_authentication():
+        show_login_page()
+        return
+    
+    # Show user info in sidebar
+    show_user_info()
+    
+    # Get current user for personalization
+    current_user = get_current_user()
+    
     # Header with Tweener Fund branding
-    st.title("💰 Tweener Fund Portfolio Intelligence")
+    st.title("💰 Tweener Insights")
     st.markdown("**Generative AI-Powered Portfolio Management Platform**")
     
     st.markdown("---")
     
-    # Welcome section
-    st.header("🎯 Welcome to Your Portfolio Command Center")
+    # Welcome section with personalization
+    if current_user:
+        welcome_name = current_user.get('full_name', 'User')
+        user_role = current_user.get('role', 'user').title()
+        st.header(f"🎯 Welcome, {welcome_name}!")
+        st.markdown(f"**Role:** {user_role} | **Access Level:** {current_user.get('role', 'N/A')}")
+    else:
+        st.header("🎯 Welcome to Your Portfolio Command Center")
     
     col1, col2 = st.columns([2, 1])
     
@@ -131,13 +162,36 @@ def main():
     
     st.markdown("---")
     
+    # Role-based feature access
+    st.markdown("---")
+    st.header("🔑 Your Access Level")
+    
+    if check_permission("read"):
+        st.success("✅ **Read Access** - View dashboard and portfolio data")
+    
+    if check_permission("write"):
+        st.success("✅ **Write Access** - Create and edit reports")
+    
+    if check_permission("user_management"):
+        st.success("✅ **Admin Access** - Manage users and settings")
+        
+        # Admin section
+        with st.expander("🔧 Admin Controls", expanded=False):
+            st.markdown("""
+            **Admin Features Available:**
+            - User management
+            - System settings
+            - Email configuration
+            - Security settings
+            """)
+    
     # Getting Started
     st.header("🚀 Getting Started")
     
     st.markdown("""
-    1. **📊 View Dashboard** - Click on "Tweener Insights" in the sidebar to see your portfolio metrics
-    2. **🤖 Ask Questions** - Use the "Portfolio Assistant" to get AI-powered insights
-    3. **📋 Explore Data** - Filter and analyze your portfolio companies
+    1. **📊 View Dashboard** - Access your portfolio metrics based on your role
+    2. **🤖 Ask Questions** - Use the AI assistant for portfolio insights
+    3. **📋 Explore Data** - Analyze portfolio companies (permissions apply)
     4. **📈 Track Performance** - Monitor key financial indicators
     """)
     
