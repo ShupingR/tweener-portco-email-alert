@@ -305,12 +305,12 @@ class ClaudeEmailProcessor:
                 })
             else:
                 # Regular text content
-            try:
-                body_content = email_message.get_payload(decode=True)
-                if body_content:
-                    body = body_content.decode('utf-8')
-            except:
-                body = str(email_message.get_payload())
+                try:
+                    body_content = email_message.get_payload(decode=True)
+                    if body_content:
+                        body = body_content.decode('utf-8')
+                except:
+                    body = str(email_message.get_payload())
         
         # Log attachment detection results
         if has_attachments:
