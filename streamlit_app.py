@@ -24,6 +24,16 @@ except ImportError as e:
     st.error(f"Authentication module import error: {e}")
     AUTH_AVAILABLE = False
 
+# Import database initialization
+try:
+    from database.connection import init_db
+    from database.models import Base
+    from database.financial_models import FinancialMetrics, MetricExtraction
+    DB_AVAILABLE = True
+except ImportError as e:
+    st.error(f"Database module import error: {e}")
+    DB_AVAILABLE = False
+
 # Page configuration
 st.set_page_config(
     page_title="Tweener Fund - Portfolio Intelligence",
@@ -67,6 +77,14 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 def main():
+    # Initialize database on startup
+    if DB_AVAILABLE:
+        try:
+            init_db()
+            st.success("✅ Database initialized successfully")
+        except Exception as e:
+            st.error(f"Database initialization error: {e}")
+    
     # Check if authentication is available
     if not AUTH_AVAILABLE:
         st.error("Authentication system not available. Please install required dependencies.")

@@ -20,6 +20,7 @@ Usage:
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database.models import Base
+from database.financial_models import FinancialMetrics, MetricExtraction
 
 # Database configuration
 DATABASE_URL = "sqlite:///tracker.db"
