@@ -1,13 +1,13 @@
 steps:
   # Build the container image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/tweener-insights:$COMMIT_SHA', '.']
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/docker-repo/tweener-insights:$COMMIT_SHA', '.']
   
-  # Push the container image to Container Registry
+  # Push the container image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/tweener-insights:$COMMIT_SHA']
+    args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/docker-repo/tweener-insights:$COMMIT_SHA']
   
-  # Deploy to Cloud Run
+  # Deploy container image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
@@ -15,7 +15,7 @@ steps:
       - 'deploy'
       - 'tweener-insights'
       - '--image'
-      - 'gcr.io/$PROJECT_ID/tweener-insights:$COMMIT_SHA'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/docker-repo/tweener-insights:$COMMIT_SHA'
       - '--region'
       - 'us-central1'
       - '--platform'
@@ -24,14 +24,27 @@ steps:
       - '--memory'
       - '2Gi'
       - '--cpu'
-      - '1'
+      - '2'
       - '--max-instances'
       - '10'
-      - '--port'
-      - '8080'
+      - '--timeout'
+      - '300'
+      - '--set-env-vars'
+      - 'GOOGLE_CLOUD_PROJECT=$PROJECT_ID'
+      - '--set-secrets'
+      - 'ADMIN_PASSWORD=ADMIN_PASSWORD:latest,ANTHROPIC_API_KEY=ANTHROPIC_API_KEY:latest,DATABASE_URL=DATABASE_URL:latest,GMAIL_PASSWORD=GMAIL_PASSWORD:latest,GMAIL_USERNAME=GMAIL_USERNAME:latest,GP_EMAILS=GP_EMAILS:latest,SESSION_SECRET=SESSION_SECRET:latest,USER_CREDENTIALS=USER_CREDENTIALS:latest'
+      - '--service-account'
+      - 'email-alert-service@$PROJECT_ID.iam.gserviceaccount.com'
 
+# Store images in Artifact Registry
 images:
-  - 'gcr.io/$PROJECT_ID/tweener-insights:$COMMIT_SHA'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/docker-repo/tweener-insights:$COMMIT_SHA'
 
+# Build timeout
+timeout: '1200s'
+
+# Logging configuration
 options:
-  logging: CLOUD_LOGGING_ONLY 
+  logging: CLOUD_LOGGING_ONLY
+  
+# Use Cloud Build service account explicitly 

@@ -5,8 +5,8 @@
       "role": "admin",
       "email": "shuping@summerai.biz",
       "full_name": "Shu Ping (Admin)",
-      "created_date": "2025-07-06T20:13:20.971817",
-      "last_login": "2025-07-06T20:34:40.312062",
+      "created_date": "2025-07-07T15:39:56.086057",
+      "last_login": "2025-07-07T16:08:37.341968",
       "active": true
     },
     "viewer": {
@@ -14,7 +14,7 @@
       "role": "viewer",
       "email": "viewer@summerai.biz",
       "full_name": "Portfolio Viewer",
-      "created_date": "2025-07-06T20:13:20.971824",
+      "created_date": "2025-07-07T15:39:56.086060",
       "last_login": null,
       "active": true
     },
@@ -23,7 +23,7 @@
       "role": "analyst",
       "email": "analyst@summerai.biz",
       "full_name": "Portfolio Analyst",
-      "created_date": "2025-07-06T20:13:20.971828",
+      "created_date": "2025-07-07T15:39:56.086061",
       "last_login": null,
       "active": true
     }

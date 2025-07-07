@@ -9,13 +9,12 @@ from typing import Dict, Optional
 
 # Default admin credentials (change these!)
 DEFAULT_ADMIN_USERNAME = "admin"
-DEFAULT_ADMIN_PASSWORD = "tweener2024"  # Change this!
+DEFAULT_ADMIN_PASSWORD = "TweenerAdmin2025"  # Production credential
 
 # Additional users (username: password)
 ADDITIONAL_USERS = {
-    "scot": "tweener_scot_2024",
-    "nikita": "tweener_nikita_2024", 
-    "shuping": "tweener_shuping_2024"
+    "viewer": "ViewerAccess2025",
+    "analyst": "AnalystAccess2025"
 }
 
 # Session timeout (in seconds) - 8 hours

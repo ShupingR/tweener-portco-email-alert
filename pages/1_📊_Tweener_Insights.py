@@ -25,7 +25,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import authentication first
 try:
-    from user_auth import check_authentication, show_login_page, show_user_info, require_permission
+    from auth import check_authentication, show_login_page, show_user_info, require_permission
     AUTH_AVAILABLE = True
 except ImportError:
     AUTH_AVAILABLE = False

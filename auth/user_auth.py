@@ -81,8 +81,7 @@ class UserManager:
                 "admin": {
                     "password_hash": self.hash_password("TweenerAdmin2025"),
                     "role": "admin",
-                    "email": "shuping@summerai.biz",
-                    "full_name": "Shu Ping (Admin)",
+                    "full_name": "Portfolio Admin",
                     "created_date": datetime.now().isoformat(),
                     "last_login": None,
                     "active": True
@@ -90,7 +89,6 @@ class UserManager:
                 "viewer": {
                     "password_hash": self.hash_password("ViewerAccess2025"),
                     "role": "viewer",
-                    "email": "viewer@summerai.biz",
                     "full_name": "Portfolio Viewer",
                     "created_date": datetime.now().isoformat(),
                     "last_login": None,
@@ -99,7 +97,6 @@ class UserManager:
                 "analyst": {
                     "password_hash": self.hash_password("AnalystAccess2025"),
                     "role": "analyst", 
-                    "email": "analyst@summerai.biz",
                     "full_name": "Portfolio Analyst",
                     "created_date": datetime.now().isoformat(),
                     "last_login": None,
@@ -147,8 +144,7 @@ class UserManager:
                     "admin": {
                         "password_hash": self.hash_password("TweenerAdmin2025"),
                         "role": "admin",
-                        "email": "shuping@summerai.biz",
-                        "full_name": "Shu Ping (Admin)",
+                        "full_name": "Portfolio Admin",
                         "created_date": datetime.now().isoformat(),
                         "last_login": None,
                         "active": True
@@ -156,7 +152,6 @@ class UserManager:
                     "viewer": {
                         "password_hash": self.hash_password("ViewerAccess2025"),
                         "role": "viewer",
-                        "email": "viewer@summerai.biz",
                         "full_name": "Portfolio Viewer",
                         "created_date": datetime.now().isoformat(),
                         "last_login": None,
@@ -339,18 +334,6 @@ def show_login_page():
     # Help section
     st.markdown("---")
     st.markdown("""
-    ### 📋 Default Accounts
-    
-    **Administrator Access:**
-    - Username: `admin`
-    - Password: `TweenerAdmin2025`
-    - Full access to all features
-    
-    **Viewer Access:**
-    - Username: `viewer` 
-    - Password: `ViewerAccess2025`
-    - Read-only access
-    
     ### 🔒 Security Features
     - Secure password hashing
     - Session management with timeout

@@ -13,12 +13,11 @@ This guide covers the authentication and security features implemented in the Tw
 - **Environment variable support** for production deployments
 
 ### Default Credentials
-⚠️ **IMPORTANT**: Change these default credentials immediately!
+⚠️ **IMPORTANT**: These are the production credentials used for both local development and deployment!
 
-- **Admin**: `admin` / `tweener2024`
-- **Scot**: `scot` / `tweener_scot_2024`
-- **Nikita**: `nikita` / `tweener_nikita_2024`
-- **Shuping**: `shuping` / `tweener_shuping_2024`
+- **Admin**: `admin` / `TweenerAdmin2025`
+- **Viewer**: `viewer` / `ViewerAccess2025`
+- **Analyst**: `analyst` / `AnalystAccess2025`
 
 ## User Management
 
@@ -48,9 +47,8 @@ python manage_users.py list
 Immediately change all default passwords after installation:
 ```bash
 python manage_users.py change admin <new_secure_password>
-python manage_users.py change scot <new_secure_password>
-python manage_users.py change nikita <new_secure_password>
-python manage_users.py change shuping <new_secure_password>
+python manage_users.py change viewer <new_secure_password>
+python manage_users.py change analyst <new_secure_password>
 ```
 
 ### 2. Use Strong Passwords

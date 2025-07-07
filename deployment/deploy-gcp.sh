@@ -23,7 +23,7 @@ gcloud services enable cloudbuild.googleapis.com run.googleapis.com containerreg
 
 # Step 2: Build and push Docker image
 echo "🏗️  Building Docker image..."
-docker build --platform linux/amd64 -t $IMAGE_NAME .
+docker build --platform linux/amd64 -f deployment/Dockerfile -t $IMAGE_NAME .
 
 echo "📤 Pushing image to Google Container Registry..."
 docker push $IMAGE_NAME

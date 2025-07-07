@@ -18,7 +18,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Import enhanced authentication with error handling
 try:
-    from user_auth import show_login_page, check_authentication, show_user_info, get_current_user, check_permission
+    from auth import show_login_page, check_authentication, show_user_info, get_current_user, check_permission
     AUTH_AVAILABLE = True
 except ImportError as e:
     st.error(f"Authentication module import error: {e}")

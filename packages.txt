@@ -1,6 +1,0 @@
-sqlite3
-unzip
-zip
-ca-certificates
-build-essential
-python3-dev 

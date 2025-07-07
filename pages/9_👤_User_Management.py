@@ -13,7 +13,7 @@ from datetime import datetime
 # Add the project root to Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from user_auth import (
+from auth import (
     check_authentication, show_login_page, show_user_info, 
     require_permission, user_manager, get_current_user
 )
