@@ -96,7 +96,7 @@ def main():
     # Check for automated email processing requests
     if EMAIL_PROCESSOR_AVAILABLE:
         # Check if this is an API call for email processing
-        if st.experimental_get_query_params().get("action") == ["process_emails"]:
+        if st.query_params.get("action") == ["process_emails"]:
             st.set_page_config(page_title="Email Processing", layout="wide")
             run_email_processing()
             return
@@ -245,7 +245,7 @@ def run_email_processing():
     
     try:
         # Get parameters from query string
-        params = st.experimental_get_query_params()
+        params = st.query_params
         days = int(params.get("days", ["7"])[0])
         dry_run = params.get("dry_run", ["false"])[0].lower() == "true"
         

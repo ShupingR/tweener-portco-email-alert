@@ -117,6 +117,44 @@ class ClaudeEmailProcessor:
         finally:
             mail.close()
             mail.logout()
+
+    def process_emails_time_range(self, start_time, end_time):
+        """Process emails for a specific time range"""
+        # Calculate days back from time range
+        time_diff = datetime.now() - start_time
+        days_back = max(1, int(time_diff.days) + 1)
+        
+        # Fetch emails and filter by time range
+        forwarded_emails = self.fetch_forwarded_emails(days_back)
+        
+        # Filter emails by time range
+        filtered_emails = []
+        for email_data in forwarded_emails:
+            email_content = self.extract_email_content(email_data['message'])
+            email_date = email_content['date']
+            if start_time <= email_date <= end_time:
+                filtered_emails.append(email_data)
+        
+        print(f"📬 Found {len(filtered_emails)} emails in time range")
+        
+        # Process the filtered emails
+        self._process_email_list(filtered_emails)
+
+    def process_emails(self, days_back=30):
+        """Process emails from the last N days"""
+        forwarded_emails = self.fetch_forwarded_emails(days_back)
+        self._process_email_list(forwarded_emails)
+
+    def _process_email_list(self, email_list):
+        """Process a list of emails"""
+        session = SessionLocal()
+        portfolio_companies = session.query(Company).all()
+        
+        try:
+            for email_data in email_list:
+                self._process_single_email(email_data, portfolio_companies, session)
+        finally:
+            session.close()
     
     def extract_email_content(self, email_message):
         """Extract content from email message including aggressive attachment detection"""
@@ -229,16 +267,16 @@ class ClaudeEmailProcessor:
                     
                     if filename:
                         # Decode filename if needed
-                            decoded_filename = decode_header(filename)
-                            if decoded_filename and decoded_filename[0]:
-                                if isinstance(decoded_filename[0][0], bytes):
-                                    try:
-                                        encoding = decoded_filename[0][1] or 'utf-8'
-                                        filename = decoded_filename[0][0].decode(encoding)
-                                    except:
-                                        filename = decoded_filename[0][0].decode('utf-8', errors='ignore')
-                                else:
-                                    filename = decoded_filename[0][0]
+                        decoded_filename = decode_header(filename)
+                        if decoded_filename and decoded_filename[0]:
+                            if isinstance(decoded_filename[0][0], bytes):
+                                try:
+                                    encoding = decoded_filename[0][1] or 'utf-8'
+                                    filename = decoded_filename[0][0].decode(encoding)
+                                except:
+                                    filename = decoded_filename[0][0].decode('utf-8', errors='ignore')
+                            else:
+                                filename = decoded_filename[0][0]
                         
                         # Clean filename
                         filename = filename.strip().strip('"\'')
@@ -580,72 +618,45 @@ CRITICAL:
             return None
     
     def process_emails(self, days_back=30):
-        """Main processing function"""
-        print("🤖 Processing emails with Claude analysis...")
-        
-        session = SessionLocal()
-        
+        """Process emails from the last N days"""
+        forwarded_emails = self.fetch_forwarded_emails(days_back)
+        self._process_email_list(forwarded_emails)
+
+    def _process_single_email(self, email_data, portfolio_companies, session):
+        """Process a single email"""
         try:
-            # Get portfolio companies for reference
-            portfolio_companies = session.query(Company).all()
-            print(f"📋 Loaded {len(portfolio_companies)} portfolio companies")
+            print(f"\n🔍 Analyzing email from {email_data['forwarder']}...")
             
-            # Fetch forwarded emails
-            forwarded_emails = self.fetch_forwarded_emails(days_back)
+            # Extract email content
+            email_content = self.extract_email_content(email_data['message'])
+            print(f"   Subject: {email_content['subject'][:60]}...")
             
-            if not forwarded_emails:
-                print("📭 No forwarded emails found")
-                return
+            # Analyze with Claude
+            analysis = self.analyze_with_claude(email_content, portfolio_companies)
             
-            processed_count = 0
-            company_updates_found = 0
+            if not analysis:
+                print("   ❌ Claude analysis failed")
+                return False
             
-            for email_data in forwarded_emails:
-                try:
-                    print(f"\n🔍 Analyzing email from {email_data['forwarder']}...")
-                    
-                    # Extract email content
-                    email_content = self.extract_email_content(email_data['message'])
-                    print(f"   Subject: {email_content['subject'][:60]}...")
-                    
-                    # Analyze with Claude
-                    analysis = self.analyze_with_claude(email_content, portfolio_companies)
-                    
-                    if not analysis:
-                        print("   ❌ Claude analysis failed")
-                        continue
-                    
-                    processed_count += 1
-                    
-                    print(f"   🤖 Claude analysis:")
-                    print(f"      Company update: {analysis.get('is_company_update', False)}")
-                    print(f"      Confidence: {analysis.get('confidence', 0):.2f}")
-                    
-                    if analysis.get('is_company_update') and analysis.get('confidence', 0) > 0.7:
-                        print(f"      Company: {analysis.get('company_name', 'Unknown')}")
-                        print(f"      Reasoning: {analysis.get('reasoning', 'N/A')[:100]}...")
-                        
-                        # Save to database
-                        if self.save_company_email(email_content, analysis, email_data['forwarder'], session):
-                            company_updates_found += 1
-                    else:
-                        print(f"      ❌ Not a company update or low confidence")
-                        if analysis.get('reasoning'):
-                            print(f"      Reasoning: {analysis.get('reasoning')[:100]}...")
+            print(f"   🤖 Claude analysis:")
+            print(f"      Company update: {analysis.get('is_company_update', False)}")
+            print(f"      Confidence: {analysis.get('confidence', 0):.2f}")
+            
+            if analysis.get('is_company_update') and analysis.get('confidence', 0) > 0.7:
+                print(f"      Company: {analysis.get('company_name', 'Unknown')}")
+                print(f"      Reasoning: {analysis.get('reasoning', 'N/A')[:100]}...")
                 
-                except Exception as e:
-                    print(f"   ❌ Error processing email: {e}")
-                    continue
-            
-            print(f"\n📊 Processing Summary:")
-            print(f"   Emails analyzed: {processed_count}")
-            print(f"   Company updates found: {company_updates_found}")
-            
+                # Save to database
+                return self.save_company_email(email_content, analysis, email_data['forwarder'], session)
+            else:
+                print(f"      ❌ Not a company update or low confidence")
+                if analysis.get('reasoning'):
+                    print(f"      Reasoning: {analysis.get('reasoning')[:100]}...")
+                return False
+                
         except Exception as e:
-            print(f"❌ Error in main processing: {e}")
-            
-        finally:
-            session.close()
+            print(f"   ❌ Error processing email: {e}")
+            return False
 
 
 def main():

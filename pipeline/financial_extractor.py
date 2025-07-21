@@ -1,5 +1,6 @@
 # financial_metrics_extractor.py
 import os
+import sys
 import re
 import json
 import anthropic
@@ -10,6 +11,14 @@ import PyPDF2
 from pptx import Presentation
 import openpyxl
 from io import BytesIO
+import argparse
+
+# Load environment variables from .env automatically
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # If dotenv is not installed, skip (but recommend installing it)
 
 from database.models import Company, EmailUpdate, Attachment
 from database.financial_models import FinancialMetrics, MetricExtraction
@@ -444,13 +453,24 @@ Content to analyze:
         finally:
             session.close()
 
+    def extract_from_email(self, email_update):
+        """Extract financial metrics from an EmailUpdate object using Claude."""
+        if not email_update or not email_update.body:
+            print("❌ No email body to extract metrics from.")
+            return None
+        company_name = email_update.company.name if email_update.company else "Unknown"
+        source_info = f"Email: {email_update.subject}"
+        return self.analyze_content_with_claude(email_update.body, company_name, source_info)
+
 
 def main():
-    """Main function for testing"""
+    parser = argparse.ArgumentParser(description="Extract financial metrics from recent emails")
+    parser.add_argument('--days', type=int, default=3, help='Number of days back to process (default: 30)')
+    args = parser.parse_args()
+
     try:
         extractor = FinancialMetricsExtractor()
-        extractor.process_recent_emails(days_back=30)
-        
+        extractor.process_recent_emails(days_back=args.days)
     except Exception as e:
         print(f"❌ Error: {e}")
 

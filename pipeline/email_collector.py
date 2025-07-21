@@ -36,8 +36,18 @@ from pipeline.email_processor import ClaudeEmailProcessor
 from database.connection import SessionLocal
 from database.models import Company, EmailUpdate, Attachment
 
-# Load environment variables
-load_dotenv()
+# Load environment variables from .env automatically
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # If dotenv is not installed, skip (but recommend installing it)
+
+def parse_datetime(dt_str):
+    try:
+        return datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S")
+    except Exception:
+        raise argparse.ArgumentTypeError(f"Invalid datetime format: {dt_str}. Use YYYY-MM-DD HH:MM:SS")
 
 class DailyEmailCollector:
     def __init__(self, dry_run=False):
@@ -245,6 +255,38 @@ class DailyEmailCollector:
         finally:
             session.close()
 
+    def collect_emails_by_datetime(self, start_dt, end_dt):
+        """Collect and process emails in a specific datetime range (inclusive)."""
+        from database.connection import SessionLocal
+        from database.models import EmailUpdate, Company, Attachment
+        session = SessionLocal()
+        try:
+            print(f"🔍 Collecting emails from {start_dt} to {end_dt}...")
+            # Find emails in the specified datetime range
+            emails = session.query(EmailUpdate).filter(EmailUpdate.date >= start_dt, EmailUpdate.date <= end_dt).all()
+            print(f"📧 Found {len(emails)} emails in specified datetime range.")
+            # For each email, check if it has already been processed for financial metrics
+            from pipeline.financial_extractor import FinancialMetricsExtractor
+            extractor = FinancialMetricsExtractor()
+            processed_count = 0
+            for email in emails:
+                # Check if metrics already exist for this email
+                from database.financial_models import FinancialMetrics
+                existing = session.query(FinancialMetrics).filter(FinancialMetrics.email_update_id == email.id).first()
+                if not existing:
+                    print(f"   - Processing: {email.company.name}: {email.subject[:60]}... ({email.date})")
+                    extractor.process_email_update(email.id)
+                    processed_count += 1
+                else:
+                    print(f"   - Already processed: {email.company.name}: {email.subject[:60]}... ({email.date})")
+            print(f"✅ Processed {processed_count} new emails for financial metrics.")
+            return {'success': True, 'emails_found': len(emails), 'emails_processed': processed_count}
+        except Exception as e:
+            print(f"❌ Error collecting emails by datetime: {e}")
+            return {'success': False, 'error': str(e)}
+        finally:
+            session.close()
+
 
 def main():
     """Main function with enhanced command line interface"""
@@ -267,13 +309,7 @@ Examples:
   python -m pipeline.email_collector --dry-run          # Test run without saving
   python -m pipeline.email_collector --days=1 --dry-run # Test with 1 day of emails
   python -m pipeline.email_collector --stats            # Show current statistics only
-
-The system monitors forwarded emails from:
-  • scot@tweenerfund.com
-  • shuping@tweenerfund.com
-  • nikita@tweenerfund.com
-  • scot@refibuy.ai
-  • shuping.ruan@gmail.com
+  python -m pipeline.email_collector --start-datetime "2025-07-21 13:30:00" --end-datetime "2025-07-21 15:00:00"
         """
     )
     
@@ -296,6 +332,9 @@ The system monitors forwarded emails from:
         help='Show current database statistics only'
     )
     
+    parser.add_argument('--start-datetime', type=parse_datetime, help='Start datetime (YYYY-MM-DD HH:MM:SS)')
+    parser.add_argument('--end-datetime', type=parse_datetime, help='End datetime (YYYY-MM-DD HH:MM:SS)')
+    
     args = parser.parse_args()
     
     try:
@@ -316,12 +355,14 @@ The system monitors forwarded emails from:
             return
         
         # Validate days parameter
-        if args.days < 1 or args.days > 365:
-            print("❌ Error: --days must be between 1 and 365")
-            sys.exit(1)
-        
-        # Run email collection
-        result = collector.collect_emails(days_back=args.days)
+        if args.start_datetime and args.end_datetime:
+            # Use datetime range for collection
+            result = collector.collect_emails_by_datetime(args.start_datetime, args.end_datetime)
+        else:
+            if args.days < 1 or args.days > 365:
+                print("❌ Error: --days must be between 1 and 365")
+                sys.exit(1)
+            result = collector.collect_emails(days_back=args.days)
         
         if result['success']:
             print(f"\n🎉 Email collection completed successfully!")

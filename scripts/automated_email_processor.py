@@ -24,6 +24,13 @@ import argparse
 from datetime import datetime, timedelta
 from pathlib import Path
 
+# Load environment variables from .env automatically
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # If dotenv is not installed, skip (but recommend installing it)
+
 # Add project root to path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
@@ -32,8 +39,8 @@ sys.path.insert(0, str(project_root))
 from pipeline.email_collector import DailyEmailCollector
 from pipeline.financial_extractor import FinancialMetricsExtractor
 from database.connection import SessionLocal, init_db
-from database.models import Company, EmailUpdate, FinancialMetrics
-from database.financial_models import FinancialMetrics as FinancialMetricsModel
+from database.models import Company, EmailUpdate
+from database.financial_models import FinancialMetrics as FinancialMetricsModel, FinancialMetrics
 
 # Configure logging
 logging.basicConfig(

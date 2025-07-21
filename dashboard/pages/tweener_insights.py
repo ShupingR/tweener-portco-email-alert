@@ -23,13 +23,6 @@ from sqlalchemy import func, text
 # Add the project root to Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Import authentication first
-try:
-    from auth import check_authentication, show_login_page, show_user_info, require_permission
-    AUTH_AVAILABLE = True
-except ImportError:
-    AUTH_AVAILABLE = False
-
 from database.models import Company, EmailUpdate
 from database.financial_models import FinancialMetrics
 from database.connection import SessionLocal
@@ -471,31 +464,6 @@ def load_financial_data():
             })
         
         df = pd.DataFrame(data)
-
-        # --- ARR/MRR Calculator ---
-        def safe_div(x, y):
-            try:
-                return x / y
-            except Exception:
-                return None
-        def safe_mul(x, y):
-            try:
-                return x * y
-            except Exception:
-                return None
-        df['arr_numeric'] = df['arr'].apply(parse_financial_value)
-        df['mrr_numeric'] = df['mrr'].apply(parse_financial_value)
-        # Calculate missing MRR from ARR
-        df['mrr_calculated'] = df.apply(
-            lambda row: safe_div(row['arr_numeric'], 12) if pd.isna(row['mrr_numeric']) and pd.notna(row['arr_numeric']) else row['mrr_numeric'], axis=1
-        )
-        # Calculate missing ARR from MRR
-        df['arr_calculated'] = df.apply(
-            lambda row: safe_mul(row['mrr_numeric'], 12) if pd.isna(row['arr_numeric']) and pd.notna(row['mrr_numeric']) else row['arr_numeric'], axis=1
-        )
-        # Format for display
-        df['mrr_calculated_display'] = df['mrr_calculated'].apply(lambda x: f"${x:,.0f}" if pd.notna(x) else '-')
-        df['arr_calculated_display'] = df['arr_calculated'].apply(lambda x: f"${x:,.0f}" if pd.notna(x) else '-')
         
         # Get summary statistics
         total_metrics = len(df)
@@ -570,7 +538,7 @@ def create_arr_chart(df):
     # Get latest ARR for each company (by reporting date when available)
     date_col = 'reporting_date' if 'reporting_date' in df_arr.columns and df_arr['reporting_date'].notna().any() else 'extracted_date'
     latest_arr = df_arr.loc[df_arr.groupby('company_name')[date_col].idxmax()]
-    latest_arr = latest_arr.sort_values('arr_numeric', ascending=False)
+    latest_arr = latest_arr.sort_values('arr_numeric', ascending=True)
     
     # Tweener Fund brand color scale - Teal theme
     tweener_color_scale = [
@@ -593,9 +561,8 @@ def create_arr_chart(df):
         color_continuous_scale=tweener_color_scale
     )
     
-    fig.update_traces(marker_line_width=1, marker_line_color='#e5e7eb', width=0.8)
     fig.update_layout(
-        height=600,
+        height=400,
         showlegend=False,
         xaxis_tickformat='$,.0f',
         plot_bgcolor='white',
@@ -612,9 +579,7 @@ def create_arr_chart(df):
             gridcolor='#edf2f7', 
             showgrid=True,
             tickfont=dict(color='#1a202c', size=12),
-            title=dict(font=dict(color='#1a202c', size=14, family="Inter, sans-serif")),
-            automargin=True,
-            autorange='reversed'
+            title=dict(font=dict(color='#1a202c', size=14, family="Inter, sans-serif"))
         )
     )
     
@@ -628,9 +593,7 @@ def create_growth_chart(df):
     # Parse growth values
     df_growth = df.copy()
     df_growth['arr_growth_numeric'] = df_growth['arr_growth'].apply(
-        lambda x: float(str(x).replace('%', '').replace('+', ''))
-        if pd.notna(x) and x != '-' and '%' in str(x) and str(x).replace('%', '').replace('+', '').replace('.', '').replace('-', '').isdigit()
-        else None
+        lambda x: float(str(x).replace('%', '').replace('+', '')) if pd.notna(x) and x != '-' and '%' in str(x) else None
     )
     
     df_growth = df_growth.dropna(subset=['arr_growth_numeric'])
@@ -1002,7 +965,7 @@ class DatabaseChatbot:
             total_companies = self.session.query(Company).filter(Company.is_tweener_portfolio == True).count()
             companies_with_metrics = self.session.query(FinancialMetrics).join(Company).filter(
                 Company.is_tweener_portfolio == True
-            ).distinct(FinancialMetrics.company_id).count()
+            ).distinct().count()
             recent_updates = self.session.query(FinancialMetrics).join(Company).filter(
                 Company.is_tweener_portfolio == True,
                 FinancialMetrics.extracted_date >= datetime.now() - timedelta(days=30)
@@ -1166,23 +1129,6 @@ def create_chatbot_ui():
     pass
 
 def main():
-    # Check authentication first
-    if not AUTH_AVAILABLE:
-        st.error("Authentication system not available. Please install required dependencies.")
-        st.info("For local development, install: pip install google-cloud-secret-manager")
-        return
-    
-    # Check authentication
-    if not check_authentication():
-        show_login_page()
-        return
-    
-    # Show user info in sidebar
-    show_user_info()
-    
-    # Check read permission
-    require_permission("read", "You need read access to view the Tweener Insights dashboard.")
-    
     # Simple header
     st.title("Tweener Insights")
     st.markdown("**Generative Portfolio Intelligence for Triangle Tweener Fund**")
@@ -1201,41 +1147,27 @@ def main():
     # Load data
     with st.spinner("Loading financial data..."):
         df, stats = load_financial_data()
-
-    # Get counts for portfolio and non-portfolio companies
-    session = SessionLocal()
-    try:
-        portfolio_count = session.query(Company).filter(Company.is_tweener_portfolio == True).count()
-        non_portfolio_count = session.query(Company).filter(Company.is_tweener_portfolio == False).count()
-    finally:
-        session.close()
-
+    
     # Overview Statistics
     st.header("📊 Portfolio Overview")
-
-    col1, col2, col3, col4 = st.columns(4)
-
+    
+    col1, col2, col3 = st.columns(3)
+    
     with col1:
         st.metric(
-            label="Portfolio Companies Tracked",
-            value=f"{stats['companies_with_metrics']}/{portfolio_count}",
-            help="Portfolio companies with financial metrics (Portfolio/Total)"
-        )
-    with col2:
-        st.metric(
-            label="Non-Portfolio Companies Tracked",
-            value=f"{non_portfolio_count}",
-            help="Companies in the database that are not Tweener portfolio companies"
+            label="Companies Tracked",
+            value=f"{stats['companies_with_metrics']}/{stats['total_companies']}",
+            help="Portfolio companies with financial metrics"
         )
     
-    with col3:
+    with col2:
         st.metric(
             label="Portfolio Coverage",
             value=f"{stats['coverage_percent']}%",
             help="Percentage of portfolio companies with metrics"
         )
     
-    with col4:
+    with col3:
         st.metric(
             label="Recent Updates",
             value=stats['recent_metrics'],
@@ -1307,8 +1239,7 @@ def main():
     tab1, tab2, tab3 = st.tabs(["💰 Revenue Metrics", "📊 Growth Analysis", "💵 Cash & Runway"])
     
     with tab1:
-        # Use ARR (Calculated) for plotting
-        arr_chart = create_arr_chart(filtered_df.assign(arr=filtered_df['arr_calculated_display']))
+        arr_chart = create_arr_chart(filtered_df)
         if arr_chart:
             st.plotly_chart(arr_chart, use_container_width=True)
         else:
@@ -1345,8 +1276,8 @@ def main():
             company_summary.append({
                 'Company': company,
                 'Latest Update': latest[date_col].strftime('%Y-%m-%d'),
-                'ARR (Calculated)': latest['arr_calculated_display'],
-                'MRR (Calculated)': latest['mrr_calculated_display'],
+                'ARR': latest['arr'] if latest['arr'] != '-' else '-',
+                'MRR': latest['mrr'] if latest['mrr'] != '-' else '-',
                 'Cash Balance': latest['cash_balance'] if latest['cash_balance'] != '-' else '-',
                 'Runway': latest['runway_months'] if latest['runway_months'] != '-' else '-',
                 'Growth': latest['arr_growth'] if latest['arr_growth'] != '-' else '-',
@@ -1376,8 +1307,8 @@ def main():
     if not display_df.empty:
         # Select columns to display
         display_columns = [
-            'company_name', 'reporting_period', 'arr', 'mrr', 'arr_calculated_display', 'mrr_calculated_display',
-            'cash_balance', 'runway_months', 'arr_growth', 'customer_count', 'team_size',
+            'company_name', 'reporting_period', 'arr', 'mrr', 'cash_balance', 
+            'runway_months', 'arr_growth', 'customer_count', 'team_size',
             'source_type', 'extraction_confidence', 'extracted_date'
         ]
         
@@ -1387,7 +1318,7 @@ def main():
         
         # Rename columns for better display
         display_data.columns = [
-            'Company', 'Period', 'ARR', 'MRR', 'ARR (Calculated)', 'MRR (Calculated)', 'Cash Balance', 
+            'Company', 'Period', 'ARR', 'MRR', 'Cash Balance', 
             'Runway', 'Growth', 'Customers', 'Team Size',
             'Source', 'Data Quality', 'Extracted'
         ]
